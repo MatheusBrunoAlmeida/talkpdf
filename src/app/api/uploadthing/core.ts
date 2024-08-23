@@ -33,7 +33,7 @@ const onUploadComplete = async ({
   file: {
     key: string
     name: string
-    url: string
+    url: string  // URL fornecida por UploadThing
   }
 }) => {
   const isFileExist = await db.file.findFirst({
@@ -44,21 +44,19 @@ const onUploadComplete = async ({
 
   if (isFileExist) return
 
+  // Usar a URL diretamente fornecida pelo UploadThing
   const createdFile = await db.file.create({
     data: {
       key: file.key,
       name: file.name,
       userId: metadata.userId,
-      url: `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`,
+      url: file.url,  // Aqui, usamos a URL diretamente
       uploadStatus: 'PROCESSING',
     },
   })
 
   try {
-    const response = await fetch(
-      `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
-    )
-
+    const response = await fetch(file.url)  // Usar a URL fornecida pelo UploadThing
     const blob = await response.blob()
 
     const loader = new PDFLoader(blob)
@@ -78,21 +76,21 @@ const onUploadComplete = async ({
       PLANS.find((plan) => plan.name === 'Free')!
         .pagesPerPdf
 
-    if (
-      (isSubscribed && isProExceeded) ||
-      (!isSubscribed && isFreeExceeded)
-    ) {
-      await db.file.update({
-        data: {
-          uploadStatus: 'FAILED',
-        },
-        where: {
-          id: createdFile.id,
-        },
-      })
-    }
+    // if (
+    //   (isSubscribed && isProExceeded) ||
+    //   (!isSubscribed && isFreeExceeded)
+    // ) {
+    //   await db.file.update({
+    //     data: {
+    //       uploadStatus: 'FAILED',
+    //     },
+    //     where: {
+    //       id: createdFile.id,
+    //     },
+    //   })
+    // }
 
-    // vectorize and index entire document
+    // Vectorize and index the document
     const pinecone = await getPineconeClient()
     const pineconeIndex = pinecone.Index('quill')
 
@@ -128,6 +126,7 @@ const onUploadComplete = async ({
     })
   }
 }
+
 
 export const ourFileRouter = {
   freePlanUploader: f({ pdf: { maxFileSize: '4MB' } })
