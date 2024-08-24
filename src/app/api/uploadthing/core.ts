@@ -1,7 +1,6 @@
 import { db } from '@/db'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import { createUploadthing, type FileRouter } from 'uploadthing/next'
-import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 import { PLANS } from '@/config/stripe'
 import { getPineconeClient } from '@/lib/pinecone'
@@ -9,6 +8,7 @@ import { PineconeStore } from '@langchain/pinecone'
 import { CohereEmbeddings } from '@langchain/cohere'
 import * as fs from 'fs'
 import Cookies from 'js-cookie'
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 
 const f = createUploadthing()
 
@@ -54,6 +54,8 @@ const onUploadComplete = async ({
       uploadStatus: 'PROCESSING',
     },
   })
+
+  console.log('file created',createdFile)
 
   try {
     const response = await fetch(file.url)
