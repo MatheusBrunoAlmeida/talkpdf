@@ -102,9 +102,7 @@ const onUploadComplete = async ({
     })
 
     // Remover o arquivo temporário
-    // fs.unlinkSync(tempFilePath)
-
-    Cookies.set('file', tempFilePath)
+    fs.unlinkSync(tempFilePath)
 
   } catch (err) {
     console.error('Erro no processamento do arquivo:', err)
