@@ -37,27 +37,28 @@ const onUploadComplete = async ({
     url: string
   }
 }) => {
-  // const isFileExist = await db.file.findFirst({
-  //   where: {
-  //     key: file.key,
-  //   },
-  // })
-
-  // if (isFileExist) return
-
-  const createdFile = await db.file.create({
-    data: {
+  const isFileExist = await db.file.findFirst({
+    where: {
       key: file.key,
-      name: file.name,
-      userId: metadata.userId,
-      url: file.url,
-      uploadStatus: 'PROCESSING',
     },
   })
 
-  console.log('file created',createdFile)
+  if (isFileExist) return
 
   try {
+
+    const createdFile = await db.file.create({
+      data: {
+        key: file.key,
+        name: file.name,
+        userId: metadata.userId,
+        url: file.url,
+        uploadStatus: 'PROCESSING',
+      },
+    })
+  
+    console.log('file created',createdFile)
+
     const response = await fetch(file.url)
     const blob = await response.blob()
 
@@ -107,15 +108,15 @@ const onUploadComplete = async ({
     fs.unlinkSync(tempFilePath)
 
   } catch (err) {
-    console.error('Erro no processamento do arquivo:', err)
-    await db.file.update({
-      data: {
-        uploadStatus: 'FAILED',
-      },
-      where: {
-        id: createdFile.id,
-      },
-    })
+    // console.error('Erro no processamento do arquivo:', err)
+    // await db.file.update({
+    //   data: {
+    //     uploadStatus: 'FAILED',
+    //   },
+    //   where: {
+    //     id: createdFile.id,
+    //   },
+    // })
   }
 }
 
