@@ -1,132 +1,151 @@
 import { db } from '@/db'
-import { openai } from '@/lib/openai'
 import { getPineconeClient } from '@/lib/pinecone'
 import { SendMessageValidator } from '@/lib/validators/SendMessageValidator'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
-import { PineconeStore } from 'langchain/vectorstores/pinecone'
+import { CohereEmbeddings } from '@langchain/cohere'
+import { PineconeStore } from '@langchain/pinecone'
+import { CohereClient } from 'cohere-ai'
 import { NextRequest } from 'next/server'
+import Cookies from 'js-cookie'
+// import { cohere } from '@/lib/cohereClient' // Importe o cliente Cohere configurado
 
-import { OpenAIStream, StreamingTextResponse } from 'ai'
+const cohere = new CohereClient({
+  token: process.env.COHERE_API_KEY
+})
 
 export const POST = async (req: NextRequest) => {
-  // endpoint for asking a question to a pdf file
+  try {
+    const body = await req.json()
 
-  const body = await req.json()
+    // Obtém a sessão do usuário
+    const session = await getKindeServerSession()
 
-  const { getUser } = getKindeServerSession()
-  const user = getUser()
-
-  const { id: userId } = user
-
-  if (!userId)
-    return new Response('Unauthorized', { status: 401 })
-
-  const { fileId, message } =
-    SendMessageValidator.parse(body)
-
-  const file = await db.file.findFirst({
-    where: {
-      id: fileId,
-      userId,
-    },
-  })
-
-  if (!file)
-    return new Response('Not found', { status: 404 })
-
-  await db.message.create({
-    data: {
-      text: message,
-      isUserMessage: true,
-      userId,
-      fileId,
-    },
-  })
-
-  // 1: vectorize message
-  const embeddings = new OpenAIEmbeddings({
-    openAIApiKey: process.env.OPENAI_API_KEY,
-  })
-
-  const pinecone = await getPineconeClient()
-  const pineconeIndex = pinecone.Index('quill')
-
-  const vectorStore = await PineconeStore.fromExistingIndex(
-    embeddings,
-    {
-      pineconeIndex,
-      namespace: file.id,
+    if (!session) {
+      return new Response('Unauthorized', { status: 401 })
     }
-  )
 
-  const results = await vectorStore.similaritySearch(
-    message,
-    4
-  )
+    const user = session.getUser()
 
-  const prevMessages = await db.message.findMany({
-    where: {
-      fileId,
-    },
-    orderBy: {
-      createdAt: 'asc',
-    },
-    take: 6,
-  })
+    if (!user || !user.id) {
+      return new Response('Unauthorized', { status: 401 })
+    }
 
-  const formattedPrevMessages = prevMessages.map((msg) => ({
-    role: msg.isUserMessage
-      ? ('user' as const)
-      : ('assistant' as const),
-    content: msg.text,
-  }))
+    const userId = user.id
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-3.5',
-    temperature: 0,
-    stream: true,
-    messages: [
-      {
-        role: 'system',
-        content:
-          'Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.',
+    // Valida o corpo da requisição
+    const { fileId, message } = SendMessageValidator.parse(body)
+
+    // Verifica se o arquivo pertence ao usuário
+    const file = await db.file.findFirst({
+      where: {
+        id: fileId,
+        userId,
       },
-      {
-        role: 'user',
-        content: `Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
-        
-  \n----------------\n
-  
-  PREVIOUS CONVERSATION:
-  ${formattedPrevMessages.map((message) => {
-    if (message.role === 'user')
-      return `User: ${message.content}\n`
-    return `Assistant: ${message.content}\n`
-  })}
-  
-  \n----------------\n
-  
-  CONTEXT:
-  ${results.map((r) => r.pageContent).join('\n\n')}
-  
-  USER INPUT: ${message}`,
+    })
+
+    if (!file) {
+      return new Response('File not found', { status: 404 })
+    }
+
+    // Salva a mensagem do usuário no banco de dados
+    await db.message.create({
+      data: {
+        text: message,
+        isUserMessage: true,
+        userId,
+        fileId,
       },
-    ],
-  })
+    })
 
-  const stream = OpenAIStream(response, {
-    async onCompletion(completion) {
-      await db.message.create({
-        data: {
-          text: completion,
-          isUserMessage: false,
-          fileId,
-          userId,
-        },
-      })
-    },
-  })
+    // Recuperar mensagens anteriores para o contexto
+    const prevMessages = await db.message.findMany({
+      where: {
+        fileId,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+      take: 6, // Ajuste conforme necessário
+    })
 
-  return new StreamingTextResponse(stream)
+    const formattedPrevMessages = prevMessages.map((msg) => ({
+      role: msg.isUserMessage ? 'user' : 'assistant',
+      content: msg.text,
+    }))
+
+    const cohereEmbeddings = new CohereEmbeddings({
+      apiKey: process.env.COHERE_API_KEY,
+      model: 'embed-multilingual-v2.0', // Modelo usado para gerar embeddings
+    })
+
+    // Conectar ao Pinecone
+    const pinecone = await getPineconeClient()
+    const pineconeIndex = pinecone.Index('talkpdf')
+
+    // Armazenar os embeddings no Pinecone
+    const vectorStore = await PineconeStore.fromExistingIndex(
+      cohereEmbeddings,
+      {
+        pineconeIndex,
+        namespace: file.id,
+      }
+    )
+
+    const results = await vectorStore.similaritySearch(
+      message,
+      4
+    )
+
+    console.log(results)
+
+    // Preparar o prompt para a API do Cohere
+    const prompt = `
+      Use o contexto fornecido ou a conversa anterior, se necessário, para responder à pergunta do usuário. Responda em markdown.
+      Se não souber a resposta, diga que não sabe e não tente inventar.
+
+      ----------------
+      CONVERSA ANTERIOR:
+      ${formattedPrevMessages
+        .map((message) =>
+          message.role === 'user'
+            ? `Usuário: ${message.content}\n`
+            : `Assistente: ${message.content}\n`
+        )
+        .join('')}
+      ----------------
+      CONTEXTO:
+      ${results.map((r) => r.pageContent).join('\n\n')} 
+      ----------------
+      MENSAGEM DO USUÁRIO: ${message}`
+
+    // Gerar uma resposta usando a API do Cohere
+    const generateResponse = await cohere.generate({
+      model: 'command-xlarge-nightly', // Use o modelo adequado da Cohere
+      prompt: prompt,
+      maxTokens: 150, // Ajuste conforme necessário
+      stopSequences: ["\n"],
+      temperature: 0,
+    })
+
+    // if (generateResponse.status !== 200 || !generateResponse.body.generations) {
+    //   return new Response('Failed to generate response', { status: 500 })
+    // }
+
+    const responseText = generateResponse.generations[0].text.trim()
+
+    // Salva a resposta gerada no banco de dados
+    await db.message.create({
+      data: {
+        text: responseText,
+        isUserMessage: false,
+        fileId,
+        userId,
+      },
+    })
+
+    return new Response(responseText, { status: 200 })
+  } catch (error) {
+    console.error('Internal server error:', error)
+    return new Response('Internal server error', { status: 500 })
+  }
 }

@@ -1,22 +1,23 @@
 import { db } from '@/db'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import {
-  createUploadthing,
-  type FileRouter,
-} from 'uploadthing/next'
-
+import { createUploadthing, type FileRouter } from 'uploadthing/next'
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf'
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai'
-import { PineconeStore } from 'langchain/vectorstores/pinecone'
-import { getPineconeClient } from '@/lib/pinecone'
 import { getUserSubscriptionPlan } from '@/lib/stripe'
 import { PLANS } from '@/config/stripe'
+import { getPineconeClient } from '@/lib/pinecone'
+import { PineconeStore } from '@langchain/pinecone'
+import { CohereEmbeddings } from '@langchain/cohere'
+import * as fs from 'fs'
+import Cookies from 'js-cookie'
 
 const f = createUploadthing()
 
 const middleware = async () => {
-  const { getUser } = getKindeServerSession()
-  const user = getUser()
+  const session = await getKindeServerSession()
+
+  if (!session) throw new Error('Unauthorized')
+
+  const user = session.getUser()
 
   if (!user || !user.id) throw new Error('Unauthorized')
 
@@ -33,7 +34,7 @@ const onUploadComplete = async ({
   file: {
     key: string
     name: string
-    url: string  // URL fornecida por UploadThing
+    url: string
   }
 }) => {
   const isFileExist = await db.file.findFirst({
@@ -44,69 +45,53 @@ const onUploadComplete = async ({
 
   if (isFileExist) return
 
-  // Usar a URL diretamente fornecida pelo UploadThing
   const createdFile = await db.file.create({
     data: {
       key: file.key,
       name: file.name,
       userId: metadata.userId,
-      url: file.url,  // Aqui, usamos a URL diretamente
+      url: file.url,
       uploadStatus: 'PROCESSING',
     },
   })
 
   try {
-    const response = await fetch(file.url)  // Usar a URL fornecida pelo UploadThing
+    const response = await fetch(file.url)
     const blob = await response.blob()
 
-    const loader = new PDFLoader(blob)
+    // Salvar o blob como um arquivo temporário no sistema de arquivos
+    const tempFilePath = `/tmp/${file.name}`
+    fs.writeFileSync(tempFilePath, Buffer.from(await blob.arrayBuffer()))
 
+    // Carregar o conteúdo do PDF
+    const loader = new PDFLoader(tempFilePath)
     const pageLevelDocs = await loader.load()
 
-    const pagesAmt = pageLevelDocs.length
+    const texts = pageLevelDocs.map((doc) => doc.pageContent)
 
-    const { subscriptionPlan } = metadata
-    const { isSubscribed } = subscriptionPlan
-
-    const isProExceeded =
-      pagesAmt >
-      PLANS.find((plan) => plan.name === 'Pro')!.pagesPerPdf
-    const isFreeExceeded =
-      pagesAmt >
-      PLANS.find((plan) => plan.name === 'Free')!
-        .pagesPerPdf
-
-    // if (
-    //   (isSubscribed && isProExceeded) ||
-    //   (!isSubscribed && isFreeExceeded)
-    // ) {
-    //   await db.file.update({
-    //     data: {
-    //       uploadStatus: 'FAILED',
-    //     },
-    //     where: {
-    //       id: createdFile.id,
-    //     },
-    //   })
-    // }
-
-    // Vectorize and index the document
-    const pinecone = await getPineconeClient()
-    const pineconeIndex = pinecone.Index('quill')
-
-    const embeddings = new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENAI_API_KEY,
+    // Configurar o cliente de embeddings do Cohere
+    const cohereEmbeddings = new CohereEmbeddings({
+      apiKey: process.env.COHERE_API_KEY,
+      model: 'embed-multilingual-v2.0', // Modelo usado para gerar embeddings
     })
 
-    await PineconeStore.fromDocuments(
+    // Conectar ao Pinecone
+    const pinecone = await getPineconeClient()
+    const pineconeIndex = pinecone.Index('talkpdf')
+
+    // Armazenar os embeddings no Pinecone
+    const pineconeStore = await PineconeStore.fromDocuments(
       pageLevelDocs,
-      embeddings,
+      cohereEmbeddings,
       {
         pineconeIndex,
         namespace: createdFile.id,
       }
     )
 
+    console.log('Pinecone Store:', pineconeStore)
+
+    // Atualizando o status do arquivo no banco de dados
     await db.file.update({
       data: {
         uploadStatus: 'SUCCESS',
@@ -115,7 +100,14 @@ const onUploadComplete = async ({
         id: createdFile.id,
       },
     })
+
+    // Remover o arquivo temporário
+    // fs.unlinkSync(tempFilePath)
+
+    Cookies.set('file', tempFilePath)
+
   } catch (err) {
+    console.error('Erro no processamento do arquivo:', err)
     await db.file.update({
       data: {
         uploadStatus: 'FAILED',
@@ -126,7 +118,6 @@ const onUploadComplete = async ({
     })
   }
 }
-
 
 export const ourFileRouter = {
   freePlanUploader: f({ pdf: { maxFileSize: '4MB' } })
