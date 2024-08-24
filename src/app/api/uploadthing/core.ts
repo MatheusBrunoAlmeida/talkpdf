@@ -37,13 +37,17 @@ const onUploadComplete = async ({
     url: string
   }
 }) => {
+  console.log('chegou aqui')
   const isFileExist = await db.file.findFirst({
     where: {
       key: file.key,
     },
   })
 
-  if (isFileExist) return
+  if (isFileExist) {
+    console.log('File existe')
+    return
+  }
 
   try {
 
@@ -61,6 +65,8 @@ const onUploadComplete = async ({
 
     const response = await fetch(file.url)
     const blob = await response.blob()
+
+    console.log('response fetch', response)
 
     // Salvar o blob como um arquivo temporário no sistema de arquivos
     const tempFilePath = `/tmp/${file.name}`
