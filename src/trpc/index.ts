@@ -182,6 +182,8 @@ export const appRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { userId } = ctx
 
+      console.log('input trcp', input)
+
       const file = await db.file.findFirst({
         where: {
           key: input.key,
