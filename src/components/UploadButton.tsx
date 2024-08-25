@@ -84,7 +84,7 @@ const UploadDropzone = ({
           })
         }
 
-        const [fileResponse] = res
+        const fileResponse = res[0]
 
         const key = fileResponse?.key
 
