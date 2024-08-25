@@ -49,9 +49,10 @@ const onUploadComplete = async ({
     return
   }
 
-  try {
+  let createdFile
 
-    const createdFile = await db.file.create({
+  try {
+    const createdFileData = await db.file.create({
       data: {
         key: file.key,
         name: file.name,
@@ -60,8 +61,15 @@ const onUploadComplete = async ({
         uploadStatus: 'PROCESSING',
       },
     })
-  
-    console.log('file created',createdFile)
+
+    createdFile = createdFileData
+  } catch (error) {
+    return console.log(error)
+  }
+
+  try {
+
+    console.log('file created', createdFile)
 
     const response = await fetch(file.url)
     const blob = await response.blob()
