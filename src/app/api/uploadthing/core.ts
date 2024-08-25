@@ -122,7 +122,7 @@ const onUploadComplete = async ({
     fs.unlinkSync(tempFilePath)
 
   } catch (err) {
-    // console.error('Erro no processamento do arquivo:', err)
+    console.error('Erro no processamento do arquivo:', err)
     // await db.file.update({
     //   data: {
     //     uploadStatus: 'FAILED',
