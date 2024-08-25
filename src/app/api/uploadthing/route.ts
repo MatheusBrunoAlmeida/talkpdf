@@ -10,3 +10,5 @@ export const { GET, POST } = createNextRouteHandler({
     uploadthingSecret: process.env.UPLOADTHING_SECRET
   }
 });
+
+console.log("UploadThing routes initialized successfully");

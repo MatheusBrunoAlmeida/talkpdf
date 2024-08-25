@@ -13,102 +13,89 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 const f = createUploadthing()
 
 const middleware = async () => {
-  const session = await getKindeServerSession()
+  try {
+    console.log('Iniciando middleware...')
+    const session = await getKindeServerSession()
 
-  if (!session) throw new Error('Unauthorized')
+    if (!session) {
+      console.error('Sessão não encontrada. Unauthorized.')
+      throw new Error('Unauthorized')
+    }
 
-  const user = session.getUser()
+    const user = session.getUser()
 
-  if (!user || !user.id) throw new Error('Unauthorized')
+    if (!user || !user.id) {
+      console.error('Usuário não encontrado ou sem ID. Unauthorized.')
+      throw new Error('Unauthorized')
+    }
 
-  const subscriptionPlan = await getUserSubscriptionPlan()
+    console.log('Usuário autenticado:', user.id)
+    const subscriptionPlan = await getUserSubscriptionPlan()
+    console.log('Plano de assinatura recuperado:', subscriptionPlan)
 
-  return { subscriptionPlan, userId: user.id }
+    return { subscriptionPlan, userId: user.id }
+
+  } catch (err) {
+    console.error('Erro no middleware:', err)
+  }
 }
 
-const onUploadComplete = async ({
-  metadata,
-  file,
-}: {
-  metadata: Awaited<ReturnType<typeof middleware>>
-  file: {
-    key: string
-    name: string
-    url: string
-  }
-}) => {
-  console.log('chegou aqui')
-  const isFileExist = await db.file.findFirst({
-    where: {
-      key: file.key,
-    },
-  })
-
-  if (isFileExist) {
-    console.log('File existe')
-    return
-  }
-
-  let createdFile
+const onUploadComplete = async ({ metadata, file }: { metadata: Awaited<ReturnType<typeof middleware>>, file: { key: string, name: string, url: string } }) => {
+  console.log('Upload completo. Iniciando processamento do arquivo...', file)
 
   try {
-    const createdFileData = await db.file.create({
+    const isFileExist = await db.file.findFirst({ where: { key: file.key } })
+
+    if (isFileExist) {
+      console.log('O arquivo já existe no banco de dados:', file.key)
+      return
+    }
+
+    console.log('Arquivo não encontrado. Criando novo registro no banco de dados...')
+    const createdFile = await db.file.create({
       data: {
         key: file.key,
         name: file.name,
-        userId: metadata.userId,
+        userId: metadata?.userId,
         url: file.url,
         uploadStatus: 'PROCESSING',
       },
     })
 
-    createdFile = createdFileData
-  } catch (error) {
-    return console.log(error)
-  }
-
-  try {
-
-    console.log('file created', createdFile)
+    console.log('Arquivo criado no banco de dados:', createdFile)
 
     const response = await fetch(file.url)
     const blob = await response.blob()
 
-    console.log('response fetch', response)
+    console.log('Arquivo baixado com sucesso:', file.url)
 
-    // Salvar o blob como um arquivo temporário no sistema de arquivos
     const tempFilePath = `/tmp/${file.name}`
     fs.writeFileSync(tempFilePath, Buffer.from(await blob.arrayBuffer()))
 
-    // Carregar o conteúdo do PDF
+    console.log('Arquivo temporário salvo em:', tempFilePath)
+
     const loader = new PDFLoader(tempFilePath)
     const pageLevelDocs = await loader.load()
 
-    const texts = pageLevelDocs.map((doc) => doc.pageContent)
+    console.log('Conteúdo do PDF carregado:', pageLevelDocs.length, 'páginas')
 
-    // Configurar o cliente de embeddings do Cohere
     const cohereEmbeddings = new CohereEmbeddings({
       apiKey: process.env.COHERE_API_KEY,
-      model: 'embed-multilingual-v2.0', // Modelo usado para gerar embeddings
+      model: 'embed-multilingual-v2.0',
     })
 
-    // Conectar ao Pinecone
     const pinecone = await getPineconeClient()
     const pineconeIndex = pinecone.Index('talkpdf')
 
-    // Armazenar os embeddings no Pinecone
-    const pineconeStore = await PineconeStore.fromDocuments(
-      pageLevelDocs,
-      cohereEmbeddings,
-      {
-        pineconeIndex,
-        namespace: createdFile.id,
-      }
-    )
+    console.log('Conectado ao Pinecone:', pineconeIndex)
 
-    console.log('Pinecone Store:', pineconeStore)
+    const pineconeStore = await PineconeStore.fromDocuments(pageLevelDocs, cohereEmbeddings, {
+      pineconeIndex,
+      namespace: createdFile.id,
+    })
 
-    // Atualizando o status do arquivo no banco de dados
+    console.log('Embeddings armazenados no Pinecone:', pineconeStore)
+
     await db.file.update({
       data: {
         uploadStatus: 'SUCCESS',
@@ -118,28 +105,39 @@ const onUploadComplete = async ({
       },
     })
 
-    // Remover o arquivo temporário
+    console.log('Status do arquivo atualizado para SUCCESS no banco de dados.')
+
     fs.unlinkSync(tempFilePath)
+    console.log('Arquivo temporário removido:', tempFilePath)
 
   } catch (err) {
     console.error('Erro no processamento do arquivo:', err)
-    // await db.file.update({
-    //   data: {
-    //     uploadStatus: 'FAILED',
-    //   },
-    //   where: {
-    //     id: createdFile.id,
-    //   },
-    // })
+
+    // if (metadata?.userId) {
+    //   console.log('Atualizando o status do arquivo para FAILED no banco de dados...')
+    //   await db.file.update({
+    //     data: {
+    //       uploadStatus: 'FAILED',
+    //     },
+    //     where: {
+    //       userId: metadata.userId,
+    //       key: file.key,
+    //     },
+    //   })
+    // }
   }
 }
 
 export const ourFileRouter = {
   freePlanUploader: f({ pdf: { maxFileSize: '4MB' } })
+  // @ts-ignore
     .middleware(middleware)
+    // @ts-ignore
     .onUploadComplete(onUploadComplete),
   proPlanUploader: f({ pdf: { maxFileSize: '16MB' } })
+  // @ts-ignore
     .middleware(middleware)
+    // @ts-ignore
     .onUploadComplete(onUploadComplete),
 } satisfies FileRouter
 

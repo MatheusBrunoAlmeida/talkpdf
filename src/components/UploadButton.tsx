@@ -33,15 +33,17 @@ const UploadDropzone = ({
     isSubscribed ? 'proPlanUploader' : 'freePlanUploader'
   )
 
-  const { mutate: startPolling } = trpc.getFile.useMutation(
-    {
-      onSuccess: (file) => {
-        router.push(`/dashboard/${file.id}`)
-      },
-      retry: true,
-      retryDelay: 500,
-    }
-  )
+  const { mutate: startPolling } = trpc.getFile.useMutation({
+    onSuccess: (file) => {
+      console.log("Arquivo recebido:", file)
+      router.push(`/dashboard/${file.id}`)
+    },
+    onError: (error) => {
+      console.error("Erro durante a requisição:", error)
+    },
+    retry: true,
+    retryDelay: 500,
+  })
 
   const startSimulatedProgress = () => {
     setUploadProgress(0)
