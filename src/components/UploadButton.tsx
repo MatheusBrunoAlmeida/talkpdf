@@ -33,6 +33,8 @@ const UploadDropzone = ({
     isSubscribed ? 'proPlanUploader' : 'freePlanUploader'
   )
 
+  console.log('startUpload', startUpload)
+
   const { mutate: startPolling } = trpc.getFile.useMutation({
     onSuccess: (file) => {
       console.log("Arquivo recebido:", file)
@@ -71,6 +73,8 @@ const UploadDropzone = ({
 
         // handle file uploading
         const res = await startUpload(acceptedFile)
+
+        console.log('rest',res)
 
         if (!res) {
           return toast({
