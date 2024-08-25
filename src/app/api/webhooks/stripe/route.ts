@@ -1,23 +1,29 @@
 import { db } from '@/db'
 import { stripe } from '@/lib/stripe'
 import { headers } from 'next/headers'
+import { NextRequest } from 'next/server'
 import type Stripe from 'stripe'
 
-export async function POST(request: Request) {
-  const body = await request.text()
+export async function POST(request: NextRequest) {
   const signature = headers().get('Stripe-Signature') ?? ''
+
+  // Capture o corpo como um buffer ao invés de texto.
+  const body = await request.arrayBuffer()
+  const rawBody = Buffer.from(body)
 
   let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(
-      body,
+      rawBody,  // Passando o corpo como buffer
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
     )
 
     console.log(event)
   } catch (err) {
+    // @ts-ignore
+    console.error(`Webhook Error: ${err.message}`)
     return new Response(
       `Webhook Error: ${
         err instanceof Error ? err.message : 'Unknown Error'
@@ -26,25 +32,19 @@ export async function POST(request: Request) {
     )
   }
 
-  const session = event.data
-    .object as Stripe.Checkout.Session
+  const session = event.data.object as Stripe.Checkout.Session
 
   if (!session?.metadata?.userId) {
-    return new Response(null, {
-      status: 200,
-    })
+    return new Response(null, { status: 200 })
   }
 
   if (event.type === 'checkout.session.completed') {
-    const subscription =
-      await stripe.subscriptions.retrieve(
-        session.subscription as string
-      )
+    const subscription = await stripe.subscriptions.retrieve(
+      session.subscription as string
+    )
 
     await db.user.update({
-      where: {
-        id: session.metadata.userId,
-      },
+      where: { id: session.metadata.userId },
       data: {
         stripeSubscriptionId: subscription.id,
         stripeCustomerId: subscription.customer as string,
@@ -57,16 +57,12 @@ export async function POST(request: Request) {
   }
 
   if (event.type === 'invoice.payment_succeeded') {
-    // Retrieve the subscription details from Stripe.
-    const subscription =
-      await stripe.subscriptions.retrieve(
-        session.subscription as string
-      )
+    const subscription = await stripe.subscriptions.retrieve(
+      session.subscription as string
+    )
 
     await db.user.update({
-      where: {
-        stripeSubscriptionId: subscription.id,
-      },
+      where: { stripeSubscriptionId: subscription.id },
       data: {
         stripePriceId: subscription.items.data[0]?.price.id,
         stripeCurrentPeriodEnd: new Date(
