@@ -140,6 +140,7 @@ export const ourFileRouter = {
     .onUploadComplete(onUploadComplete),
   proPlanUploader: f({ pdf: { maxFileSize: '16MB' } })
     .middleware(middleware)
+    .onUploadError((error)=> console.log('error',error))
     .onUploadComplete(onUploadComplete),
 } satisfies FileRouter
 
