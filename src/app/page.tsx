@@ -16,14 +16,13 @@ export default function Home() {
           </p>
         </div> */}
         <h1 className='max-w-4xl text-5xl font-bold md:text-6xl lg:text-7xl'>
-          Chat with your{' '}
-          <span className='text-blue-600'>documents</span>{' '}
-          in seconds.
+          Faça pertuntas sobre seus{' '}
+          <span className='text-blue-600'>documentos</span>{' '}
+          em segundos.
         </h1>
         <p className='mt-5 max-w-prose text-zinc-700 sm:text-lg'>
-          Quill allows you to have conversations with any
-          PDF document. Simply upload your file and start
-          asking questions right away.
+          TalkPdf usa inteligencia artificial para responder as perguntas
+          que você fizer sobre o seu documento enviado
         </p>
 
         <Link
@@ -33,7 +32,7 @@ export default function Home() {
           })}
           href='/dashboard'
           target='_blank'>
-          Get started{' '}
+          Teste grátis{' '}
           <ArrowRight className='ml-2 h-5 w-5' />
         </Link>
       </MaxWidthWrapper>
@@ -89,11 +88,11 @@ export default function Home() {
         <div className='mb-12 px-6 lg:px-8'>
           <div className='mx-auto max-w-2xl sm:text-center'>
             <h2 className='mt-2 font-bold text-4xl text-gray-900 sm:text-5xl'>
-              Start chatting in minutes
+              Começe um chat em segundos
             </h2>
             <p className='mt-4 text-lg text-gray-600'>
-              Chatting to your PDF files has never been
-              easier than with Quill.
+              Conversar sobre seus documentos nunca foi tão facil como
+              com o TalkPdf.
             </p>
           </div>
         </div>
@@ -103,18 +102,18 @@ export default function Home() {
           <li className='md:flex-1'>
             <div className='flex flex-col space-y-2 border-l-4 border-zinc-300 py-2 pl-4 md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-4'>
               <span className='text-sm font-medium text-blue-600'>
-                Step 1
+                Passo 1
               </span>
               <span className='text-xl font-semibold'>
-                Sign up for an account
+                Crie sua conta
               </span>
               <span className='mt-2 text-zinc-700'>
-                Either starting out with a free plan or
-                choose our{' '}
+                Começe com um plano gratuido
+                escolha o seu{' '}
                 <Link
                   href='/pricing'
                   className='text-blue-700 underline underline-offset-2'>
-                  pro plan
+                  plano pro
                 </Link>
                 .
               </span>
@@ -126,25 +125,25 @@ export default function Home() {
                 Step 2
               </span>
               <span className='text-xl font-semibold'>
-                Upload your PDF file
+                Faça upload do seu pdf facilmente
               </span>
               <span className='mt-2 text-zinc-700'>
-                We&apos;ll process your file and make it
-                ready for you to chat with.
+                Nós; processaremos seu arquivo e deixaremos
+                pronto para uma experiencia única com IA.
               </span>
             </div>
           </li>
           <li className='md:flex-1'>
             <div className='flex flex-col space-y-2 border-l-4 border-zinc-300 py-2 pl-4 md:border-l-0 md:border-t-2 md:pb-0 md:pl-0 md:pt-4'>
               <span className='text-sm font-medium text-blue-600'>
-                Step 3
+                Passo 3
               </span>
               <span className='text-xl font-semibold'>
-                Start asking questions
+                Começe suaas perguntas
               </span>
               <span className='mt-2 text-zinc-700'>
-                It&apos;s that simple. Try out Quill today -
-                it really takes less than a minute.
+                De maneira simples, tenha uma experiencia 
+                que aumentará sua performace com documentos e seus estudos.
               </span>
             </div>
           </li>
