@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -15,11 +15,15 @@ import { useUploadThing } from '@/lib/uploadthing'
 import { useToast } from './ui/use-toast'
 import { trpc } from '@/app/_trpc/client'
 import { useRouter } from 'next/navigation'
+import { PDFDocument } from 'pdf-lib'
+
 
 const UploadDropzone = ({
   isSubscribed,
+  userPlan
 }: {
-  isSubscribed: boolean
+  isSubscribed: boolean,
+  userPlan: any
 }) => {
   const router = useRouter()
 
@@ -32,8 +36,6 @@ const UploadDropzone = ({
   const { startUpload } = useUploadThing(
     isSubscribed ? 'proPlanUploader' : 'freePlanUploader'
   )
-
-  console.log('startUpload', startUpload)
 
   const { mutate: startPolling } = trpc.getFile.useMutation({
     onSuccess: (file) => {
@@ -67,14 +69,51 @@ const UploadDropzone = ({
     <Dropzone
       multiple={false}
       onDrop={async (acceptedFile) => {
-        setIsUploading(true)
 
+        console.log(acceptedFile)
+
+        const file = acceptedFile[0];
+
+        console.log(userPlan)
+
+        const arrayBuffer = await file.arrayBuffer()
+        const pdfDoc = await PDFDocument.load(arrayBuffer)
+        const pdfPages = pdfDoc.getPageCount()
+        setIsUploading(true)
         const progressInterval = startSimulatedProgress()
+
+        console.log(pdfPages)
+
+        if(pdfPages > userPlan?.pagesPerPdf ){
+          toast({
+            title: 'Seu documento tem mais páginas do que o permitido',
+            description: 'Atualize para um plano máior para poder subir documentos com mais páginas',
+            variant: 'destructive',
+          })
+
+          router.push('/pricing')
+
+          return
+        }
+
+        const fileSize = (file.size / (1024 * 1024)).toFixed(2)
+
+        console.log(fileSize)
+
+        if(fileSize >  userPlan.sizePdf){
+          toast({
+            title: 'Seu documento tem um tamanho maior do que o permitido',
+            description: 'Atualize para um plano máior para poder subir documentos com um tamanho maior',
+            variant: 'destructive',
+          })
+
+          router.push('/pricing')
+
+          return
+        }
 
         // handle file uploading
         const res = await startUpload(acceptedFile)
-
-        console.log('rest',res)
 
         if (!res) {
           return toast({
@@ -169,10 +208,15 @@ const UploadDropzone = ({
 
 const UploadButton = ({
   isSubscribed,
+  userPlan,
+  quota
 }: {
-  isSubscribed: boolean
+  isSubscribed: boolean,
+  userPlan: object
+  quota?: number
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [isDisabled, setisDisalbled] = useState(false)
 
   return (
     <Dialog
@@ -185,11 +229,12 @@ const UploadButton = ({
       <DialogTrigger
         onClick={() => setIsOpen(true)}
         asChild>
-        <Button>Carregar PDF</Button>
+          {/* @ts-ignore */}
+        <Button disabled={isDisabled}>Carregar PDF</Button>
       </DialogTrigger>
 
       <DialogContent>
-        <UploadDropzone isSubscribed={isSubscribed} />
+        <UploadDropzone isSubscribed={isSubscribed} userPlan={userPlan} />
       </DialogContent>
     </Dialog>
   )

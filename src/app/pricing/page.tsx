@@ -25,59 +25,59 @@ const Page = () => {
   const pricingItems = [
     {
       plan: 'Free',
-      tagline: 'For small side projects.',
-      quota: 10,
+      tagline: 'Para poucos documentos.',
+      quota: 3,
       features: [
         {
-          text: '5 pages per PDF',
+          text: '5 Páginas por PDF',
           footnote:
-            'The maximum amount of pages per PDF-file.',
+            'O máximo de paginas por PDF.',
         },
         {
-          text: '4MB file size limit',
+          text: '4MB permitido por arquivo.',
           footnote:
-            'The maximum file size of a single PDF file.',
+            'O máximo do tamnho do arquivo PDF permitido.',
         },
         {
-          text: 'Mobile-friendly interface',
+          text: 'Disponivel para celular e Desktop',
         },
         {
-          text: 'Higher-quality responses',
+          text: 'Respostas maiores',
           footnote:
-            'Better algorithmic responses for enhanced content quality',
+            'Tamanho da mensagem que pode ser obtida sobre seu arquivo',
           negative: true,
         },
         {
-          text: 'Priority support',
+          text: 'Prioridade no suporte',
           negative: true,
         },
       ],
     },
     {
       plan: 'Pro',
-      tagline: 'For larger projects with higher needs.',
+      tagline: 'Grande quantidade de documentos.',
       quota: PLANS.find((p) => p.slug === 'pro')!.quota,
       features: [
         {
-          text: '25 pages per PDF',
+          text: '25 Páginas por PDF',
           footnote:
-            'The maximum amount of pages per PDF-file.',
+            'O máximo de paginas por PDF.',
         },
         {
-          text: '16MB file size limit',
+          text: '16MB permitido por arquivo.',
           footnote:
-            'The maximum file size of a single PDF file.',
+            'O máximo do tamnho do arquivo PDF permitido.',
         },
         {
-          text: 'Mobile-friendly interface',
+          text: 'Disponivel para celular e Desktop',
         },
         {
-          text: 'Higher-quality responses',
+          text: 'Respostas maiores',
           footnote:
-            'Better algorithmic responses for enhanced content quality',
+            'Tamanho da mensagem que pode ser obtida sobre seu arquivo',
         },
         {
-          text: 'Priority support',
+          text: 'Prioridade no suporte',
         },
       ],
     },
@@ -88,11 +88,10 @@ const Page = () => {
       <MaxWidthWrapper className='mb-8 mt-24 text-center max-w-5xl'>
         <div className='mx-auto mb-10 sm:max-w-lg'>
           <h1 className='text-6xl font-bold sm:text-7xl'>
-            Pricing
+            Preço
           </h1>
           <p className='mt-5 text-gray-600 sm:text-lg'>
-            Whether you&apos;re just trying out our service
-            or need more, we&apos;ve got you covered.
+            Os melhores preços que cabem no seu bolso.
           </p>
         </div>
 
@@ -119,7 +118,7 @@ const Page = () => {
                     )}>
                     {plan === 'Pro' && (
                       <div className='absolute -top-5 left-0 right-0 mx-auto w-32 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 px-3 py-2 text-sm font-medium text-white'>
-                        Upgrade now
+                        Recomendado
                       </div>
                     )}
 
@@ -131,18 +130,18 @@ const Page = () => {
                         {tagline}
                       </p>
                       <p className='my-5 font-display text-6xl font-semibold'>
-                        ${price}
+                        R$ {price}
                       </p>
                       <p className='text-gray-500'>
-                        per month
+                        por mês
                       </p>
                     </div>
 
                     <div className='flex h-20 items-center justify-center border-b border-t border-gray-200 bg-gray-50'>
                       <div className='flex items-center space-x-1'>
                         <p>
-                          {quota.toLocaleString()} PDFs/mo
-                          included
+                          {quota.toLocaleString()} PDFs/mês
+                          incluído
                         </p>
 
                         <Tooltip delayDuration={300}>
@@ -150,8 +149,7 @@ const Page = () => {
                             <HelpCircle className='h-4 w-4 text-zinc-500' />
                           </TooltipTrigger>
                           <TooltipContent className='w-80 p-2'>
-                            How many PDFs you can upload per
-                            month.
+                            Quantos PDFs você pode subir por mês.
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -219,7 +217,7 @@ const Page = () => {
                             className: 'w-full',
                             variant: 'secondary',
                           })}>
-                          {user ? 'Upgrade now' : 'Sign up'}
+                          {user ? 'Selecionar' : 'Selecionar'}
                           <ArrowRight className='h-5 w-5 ml-1.5' />
                         </Link>
                       ) : user ? (
@@ -230,7 +228,7 @@ const Page = () => {
                           className={buttonVariants({
                             className: 'w-full',
                           })}>
-                          {user ? 'Upgrade now' : 'Sign up'}
+                          {user ? 'Atualizar agora' : 'Escolher esse'}
                           <ArrowRight className='h-5 w-5 ml-1.5' />
                         </Link>
                       )}

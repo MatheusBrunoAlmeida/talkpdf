@@ -44,8 +44,11 @@ export async function getUserSubscriptionPlan() {
 
   const plan = isSubscribed
     ? PLANS.find((plan) => plan.price.priceIds.test === dbUser.stripePriceId)
-    : null
+    : PLANS[0]
 
+    if(!isSubscribed){
+      console.log(plan)
+    }
   let isCanceled = false
   if (isSubscribed && dbUser.stripeSubscriptionId) {
     const stripePlan = await stripe.subscriptions.retrieve(
