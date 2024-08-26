@@ -20,8 +20,10 @@ const Navbar = () => {
         <div className='flex h-14 items-center justify-between border-b border-zinc-200'>
           <Link
             href='/'
-            className='flex z-40 font-semibold'>
-            <span>Talk Pdf.</span>
+            className='flex z-40 font-semibold flex-row gap-1'>
+              
+            <span>TalkPdf</span>
+            <img src='/logo.svg' style={{width: '1.5rem'}}/>
           </Link>
 
           <MobileNav isAuth={!!user} />
@@ -35,20 +37,20 @@ const Navbar = () => {
                     variant: 'ghost',
                     size: 'sm',
                   })}>
-                  Pricing
+                  Preço
                 </Link>
                 <LoginLink
                   className={buttonVariants({
                     variant: 'ghost',
                     size: 'sm',
                   })}>
-                  Sign in
+                  Entrar
                 </LoginLink>
                 <RegisterLink
                   className={buttonVariants({
                     size: 'sm',
                   })}>
-                  Get started{' '}
+                  Começar{' '}
                   <ArrowRight className='ml-1.5 h-5 w-5' />
                 </RegisterLink>
               </>

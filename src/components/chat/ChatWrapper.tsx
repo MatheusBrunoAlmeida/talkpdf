@@ -41,10 +41,10 @@ const ChatWrapper = ({
           <div className='flex flex-col items-center gap-2'>
             <Loader2 className='h-8 w-8 text-blue-500 animate-spin' />
             <h3 className='font-semibold text-xl'>
-              Loading...
+              Carregando...
             </h3>
             <p className='text-zinc-500 text-sm'>
-              We&apos;re preparing your PDF.
+              Estamos preparando seu Pdf.
             </p>
           </div>
         </div>
@@ -60,10 +60,10 @@ const ChatWrapper = ({
           <div className='flex flex-col items-center gap-2'>
             <Loader2 className='h-8 w-8 text-blue-500 animate-spin' />
             <h3 className='font-semibold text-xl'>
-              Processing PDF...
+              Processando PDF...
             </h3>
             <p className='text-zinc-500 text-sm'>
-              This won&apos;t take long.
+              Isso não irá demorar.
             </p>
           </div>
         </div>

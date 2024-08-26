@@ -50,10 +50,10 @@ const BillingForm = ({
         }}>
         <Card>
           <CardHeader>
-            <CardTitle>Subscription Plan</CardTitle>
+            <CardTitle>Plano assinado</CardTitle>
             <CardDescription>
-              You are currently on the{' '}
-              <strong>{subscriptionPlan.name}</strong> plan.
+              Você está no plano{' '}
+              <strong>{subscriptionPlan.name}</strong>.
             </CardDescription>
           </CardHeader>
 
@@ -63,20 +63,19 @@ const BillingForm = ({
                 <Loader2 className='mr-4 h-4 w-4 animate-spin' />
               ) : null}
               {subscriptionPlan.isSubscribed
-                ? 'Manage Subscription'
-                : 'Upgrade to PRO'}
+                ? 'Gerenciar assinatura'
+                : 'Upgrade para o PRO'}
             </Button>
 
             {subscriptionPlan.isSubscribed ? (
               <p className='rounded-full text-xs font-medium'>
                 {subscriptionPlan.isCanceled
-                  ? 'Your plan will be canceled on '
-                  : 'Your plan renews on'}
+                  ? 'Seu plano vai ser cancelado em '
+                  : 'Seu plano renova em '}
                 {format(
                   subscriptionPlan.stripeCurrentPeriodEnd!,
-                  'dd.MM.yyyy'
+                  'dd/MM/yyyy'
                 )}
-                .
               </p>
             ) : null}
           </CardFooter>

@@ -9,20 +9,20 @@ import '../output.css'
 export default function Home() {
   return (
     <>
-      <MaxWidthWrapper className='mb-12 mt-28 sm:mt-40 flex flex-col items-center justify-center text-center'>
+      <MaxWidthWrapper className='mb-12 mt-16 sm:mt-40 flex flex-col items-center justify-center text-center'>
         {/* <div className='mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-gray-200 bg-white px-7 py-2 shadow-md backdrop-blur transition-all hover:border-gray-300 hover:bg-white/50'>
           <p className='text-sm font-semibold text-gray-700'>
             Quill is now public!
           </p>
         </div> */}
-        <h1 className='max-w-4xl text-5xl font-bold md:text-6xl lg:text-7xl'>
-          Faça pertuntas sobre seus{' '}
+        <span className='max-w-4xl text-3xl font-bold md:text-6xl lg:text-2xl'>
+          Transforme seus{' '}
           <span className='text-blue-600'>documentos</span>{' '}
-          em segundos.
-        </h1>
-        <p className='mt-5 max-w-prose text-zinc-700 sm:text-lg'>
-          TalkPdf usa inteligencia artificial para responder as perguntas
-          que você fizer sobre o seu documento enviado
+          em respostas imediatas com <span className='text-blue-600'>Inteligência Artificial!</span>
+        </span>
+        <p className='mt-5 max-w-4xl text-zinc-700 sm:text-lg'>
+          Obtenha insights rápidos e precisos sobre seus documentos PDF,
+          aproveitando o poder da IA.
         </p>
 
         <Link
@@ -142,7 +142,7 @@ export default function Home() {
                 Começe suaas perguntas
               </span>
               <span className='mt-2 text-zinc-700'>
-                De maneira simples, tenha uma experiencia 
+                De maneira simples, tenha uma experiencia
                 que aumentará sua performace com documentos e seus estudos.
               </span>
             </div>

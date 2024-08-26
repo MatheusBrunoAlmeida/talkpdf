@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback } from './ui/avatar'
 import Image from 'next/image'
 import { Icons } from './Icons'
 import Link from 'next/link'
-import { Gem } from 'lucide-react'
+import { ArrowRight, Gem, LogOut } from 'lucide-react'
 import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/server'
 
 interface UserAccountNavProps {
@@ -78,7 +78,7 @@ const UserAccountNav = async ({
         <DropdownMenuItem asChild>
           {subscriptionPlan?.isSubscribed ? (
             <Link href='/dashboard/billing'>
-              Manage Subscription
+              Gerenciar assinatura
             </Link>
           ) : (
             <Link href='/pricing'>
@@ -90,8 +90,9 @@ const UserAccountNav = async ({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem className='cursor-pointer'>
-            <LogoutLink>Log out</LogoutLink>
+        <DropdownMenuItem className='cursor-pointer flex flex-row'>
+            <LogoutLink>Sair </LogoutLink>
+            <LogOut className='ml-2 h-5 w-5' />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

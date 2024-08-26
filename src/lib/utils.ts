@@ -16,8 +16,8 @@ export function absoluteUrl(path: string) {
 }
 
 export function constructMetadata({
-  title = "Quill - the SaaS for students",
-  description = "Quill is an open-source software to make chatting to your PDF files easy.",
+  title = "TalkPdf - um SaaS para todos",
+  description = "TalkPdf é um SaaS para que você possa conversar com IA sobre seu documento de maneira facíl.",
   image = "/thumbnail.png",
   icons = "/favicon.ico",
   noIndex = false
@@ -48,7 +48,7 @@ export function constructMetadata({
       creator: "@joshtriedcoding"
     },
     icons,
-    metadataBase: new URL('https://quill-jet.vercel.app'),
+    metadataBase: new URL('https://talkpdf-ochre.vercel.app/'),
     themeColor: '#FFF',
     ...(noIndex && {
       robots: {

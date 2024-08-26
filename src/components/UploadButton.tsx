@@ -113,12 +113,12 @@ const UploadDropzone = ({
                 <Cloud className='h-6 w-6 text-zinc-500 mb-2' />
                 <p className='mb-2 text-sm text-zinc-700'>
                   <span className='font-semibold'>
-                    Click to upload
+                    Click para selecionar
                   </span>{' '}
-                  or drag and drop
+                  ou arraste os arquivos
                 </p>
                 <p className='text-xs text-zinc-500'>
-                  PDF (up to {isSubscribed ? "16" : "4"}MB)
+                  PDF (tamanho máximo {isSubscribed ? "16" : "4"}MB)
                 </p>
               </div>
 
@@ -147,7 +147,7 @@ const UploadDropzone = ({
                   {uploadProgress === 100 ? (
                     <div className='flex gap-1 items-center justify-center text-sm text-zinc-700 text-center pt-2'>
                       <Loader2 className='h-3 w-3 animate-spin' />
-                      Redirecting...
+                      Redirecionando...
                     </div>
                   ) : null}
                 </div>
