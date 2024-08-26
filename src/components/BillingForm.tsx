@@ -79,6 +79,7 @@ const BillingForm = ({
 
     const handleCancelSubscription = async () => {
       setIsCanceling(true)
+      // @ts-ignore
       cancelSubscription({ subscriptionId: subscriptionPlan.stripeSubscriptionId })
     }
 
@@ -97,6 +98,7 @@ const BillingForm = ({
             <CardTitle>Plano assinado</CardTitle>
             <CardDescription>
               Você está no plano{' '}
+              {/* @ts-ignore */}
               <strong>{subscriptionPlan.name}</strong>.
             </CardDescription>
           </CardHeader>
