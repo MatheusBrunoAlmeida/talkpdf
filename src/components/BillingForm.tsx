@@ -1,6 +1,6 @@
 'use client'
 
-import { getUserSubscriptionPlan } from '@/lib/stripe'
+import { getUserSubscriptionPlan, stripe } from '@/lib/stripe'
 import { useToast } from './ui/use-toast'
 import { trpc } from '@/app/_trpc/client'
 import MaxWidthWrapper from './MaxWidthWrapper'
@@ -14,6 +14,16 @@ import {
 import { Button } from './ui/button'
 import { Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { useState } from 'react'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
+import { api } from '@/lib/axios'
 
 interface BillingFormProps {
   subscriptionPlan: Awaited<
@@ -25,6 +35,10 @@ const BillingForm = ({
   subscriptionPlan,
 }: BillingFormProps) => {
   const { toast } = useToast()
+  const [isCanceling, setIsCanceling] = useState(false)
+  const [isConfirmingCancel, setIsConfirmingCancel] = useState(false)
+
+  console.log(subscriptionPlan)
 
   const { mutate: createStripeSession, isLoading } =
     trpc.createStripeSession.useMutation({
@@ -40,13 +54,43 @@ const BillingForm = ({
       },
     })
 
+    const { mutate: cancelSubscription } = trpc.cancelSubiscription.useMutation({
+      onSuccess: (response) => {
+        console.log(response)
+        toast({
+          title: 'Assinatura cancelada com sucesso',
+          description: 'Sua assinatura foi cancelada.',
+        })
+
+        window.location.reload()
+        setIsConfirmingCancel(false)
+      },
+      onError: (error) => {
+        toast({
+          title: 'Erro',
+          description: 'Houve um problema ao cancelar sua assinatura.',
+          variant: 'destructive',
+        })
+        setIsCanceling(false)
+      },
+    })
+    
+    
+
+    const handleCancelSubscription = async () => {
+      setIsCanceling(true)
+      cancelSubscription({ subscriptionId: subscriptionPlan.stripeSubscriptionId })
+    }
+
   return (
     <MaxWidthWrapper className='max-w-5xl'>
       <form
         className='mt-12'
         onSubmit={(e) => {
           e.preventDefault()
-          createStripeSession()
+          if (!subscriptionPlan.isSubscribed) {
+            createStripeSession()
+          }
         }}>
         <Card>
           <CardHeader>
@@ -58,14 +102,52 @@ const BillingForm = ({
           </CardHeader>
 
           <CardFooter className='flex flex-col items-start space-y-2 md:flex-row md:justify-between md:space-x-0'>
-            <Button type='submit'>
-              {isLoading ? (
-                <Loader2 className='mr-4 h-4 w-4 animate-spin' />
-              ) : null}
-              {subscriptionPlan.isSubscribed
-                ? 'Gerenciar assinatura'
-                : 'Upgrade para o PRO'}
-            </Button>
+            {subscriptionPlan.isSubscribed ? (
+              <>
+                <Dialog open={isConfirmingCancel} onOpenChange={setIsConfirmingCancel}>
+                  <DialogTrigger asChild>
+                    <Button
+                      type='button'
+                      disabled={isLoading || isCanceling}
+                      onClick={() => setIsConfirmingCancel(true)}
+                    >
+                      {(isLoading || isCanceling) ? (
+                        <Loader2 className='mr-4 h-4 w-4 animate-spin' />
+                      ) : null}
+                      {'Cancelar assinatura'}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Confirmar Cancelamento</DialogTitle>
+                    </DialogHeader>
+                    <p>Você tem certeza que deseja cancelar sua assinatura?</p>
+                    <DialogFooter>
+                      <Button variant='outline' onClick={() => setIsConfirmingCancel(false)}>
+                        Não, voltar
+                      </Button>
+                      <Button
+                        variant='destructive'
+                        onClick={handleCancelSubscription}
+                        disabled={isCanceling}
+                      >
+                        {isCanceling ? (
+                          <Loader2 className='mr-4 h-4 w-4 animate-spin' />
+                        ) : null}
+                        Sim, cancelar assinatura
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </>
+            ) : (
+              <Button type='submit' disabled={isLoading}>
+                {(isLoading) ? (
+                  <Loader2 className='mr-4 h-4 w-4 animate-spin' />
+                ) : null}
+                {'Upgrade para PRO'}
+              </Button>
+            )}
 
             {subscriptionPlan.isSubscribed ? (
               <p className='rounded-full text-xs font-medium'>

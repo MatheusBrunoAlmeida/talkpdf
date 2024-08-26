@@ -43,6 +43,8 @@ export async function POST(request: Request) {
         session.subscription as string
       )
 
+      console.log('web hook called')
+
     await db.user.update({
       where: {
         id: session.metadata.userId,
@@ -54,6 +56,7 @@ export async function POST(request: Request) {
         stripeCurrentPeriodEnd: new Date(
           subscription.current_period_end * 1000
         ),
+        userPlan: 'pro'
       },
     })
   }

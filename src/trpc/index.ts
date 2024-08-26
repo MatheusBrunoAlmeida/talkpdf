@@ -36,6 +36,7 @@ export const appRouter = router({
         data: {
           id: user.id,
           email: user.email,
+          userPlan: 'free'
         },
       })
     }
@@ -86,6 +87,8 @@ export const appRouter = router({
         return { url: stripeSession.url }
       }
 
+      console.log('sub')
+
       const stripeSession =
         await stripe.checkout.sessions.create({
           success_url: billingUrl,
@@ -96,7 +99,7 @@ export const appRouter = router({
           line_items: [
             {
               price: PLANS.find(
-                (plan) => plan.name === 'Pro'
+                (plan) => plan.slug === 'pro'
               )?.price.priceIds.test,
               quantity: 1,
             },
@@ -176,6 +179,37 @@ export const appRouter = router({
 
       return { status: file.uploadStatus }
     }),
+
+    cancelSubiscription: publicProcedure
+    .input(z.object({ subscriptionId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      // Cancela a assinatura no Stripe
+      const deletedSubscription = await stripe.subscriptions.cancel(input.subscriptionId)
+
+      const user = await db.user.findFirst({
+        where: {
+          stripeSubscriptionId: deletedSubscription.id
+        }
+      })
+
+      const userUpdated = await db.user.update({
+        where: {
+          id: user?.id
+        },
+        data: {
+          stripeCurrentPeriodEnd: null,
+          stripeCustomerId: null,
+          stripePriceId: null,
+          stripeSubscriptionId: null,
+          userPlan: 'free'
+        }
+      })
+  
+      console.log('assinatura', deletedSubscription)
+  
+      return { deletedSubscription, userUpdated }
+    }),
+  
 
   getFile: privateProcedure
     .input(z.object({ key: z.string() }))

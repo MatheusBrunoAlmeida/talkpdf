@@ -1,14 +1,89 @@
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Check, HelpCircle, Minus } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import Image from 'next/image'
 
 import '../output.css'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@radix-ui/react-tooltip'
+import { PLANS } from '@/config/stripe'
+import { cn } from '@/lib/utils'
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import UpgradeButton from '@/components/UpgradeButton'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import {NextSeo} from  'next-seo'
 
 export default function Home() {
+  const { getUser } = getKindeServerSession()
+  const user = getUser()
+
+  const pricingItems = [
+    {
+      plan: 'Free',
+      tagline: 'Para poucos documentos.',
+      quota: 3,
+      features: [
+        {
+          text: '5 Páginas por PDF',
+          footnote:
+            'O máximo de paginas por PDF.',
+        },
+        {
+          text: '4MB permitido por arquivo.',
+          footnote:
+            'O máximo do tamnho do arquivo PDF permitido.',
+        },
+        {
+          text: 'Disponivel para celular e Desktop',
+        },
+        {
+          text: 'Respostas maiores',
+          footnote:
+            'Tamanho da mensagem que pode ser obtida sobre seu arquivo',
+          negative: true,
+        },
+        {
+          text: 'Prioridade no suporte',
+          negative: true,
+        },
+      ],
+    },
+    {
+      plan: 'Pro',
+      tagline: 'Grande quantidade de documentos.',
+      quota: PLANS.find((p) => p.slug === 'pro')!.quota,
+      features: [
+        {
+          text: '25 Páginas por PDF',
+          footnote:
+            'O máximo de paginas por PDF.',
+        },
+        {
+          text: '16MB permitido por arquivo.',
+          footnote:
+            'O máximo do tamnho do arquivo PDF permitido.',
+        },
+        {
+          text: 'Disponivel para celular e Desktop',
+        },
+        {
+          text: 'Respostas maiores',
+          footnote:
+            'Tamanho da mensagem que pode ser obtida sobre seu arquivo',
+        },
+        {
+          text: 'Prioridade no suporte',
+        },
+      ],
+    },
+  ]
+
   return (
     <>
+    {/* <NextSeo 
+      title='TalkPdf'
+      description='A sua plataforma de PDF + IA'
+    /> */}
       <MaxWidthWrapper className='mb-12 mt-16 sm:mt-40 flex flex-col items-center justify-center text-center'>
         {/* <div className='mx-auto mb-4 flex max-w-fit items-center justify-center space-x-2 overflow-hidden rounded-full border border-gray-200 bg-white px-7 py-2 shadow-md backdrop-blur transition-all hover:border-gray-300 hover:bg-white/50'>
           <p className='text-sm font-semibold text-gray-700'>
@@ -163,7 +238,200 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        <MaxWidthWrapper>
+          <div style={{ marginTop: '10rem' }} className='flex flex-col w-full items-center justify-center mb-10 '>
+            <h1 className='text-6xl font-bold sm:text-7xl'>
+              Preço
+            </h1>
+            <p className='mt-5 text-gray-600 sm:text-lg'>
+              Os melhores preços que cabem no seu bolso.
+            </p>
+          </div>
+
+          <div className='pt-12 grid grid-cols-1 gap-10 lg:grid-cols-2'>
+            <TooltipProvider>
+              {pricingItems.map(
+                ({ plan, tagline, quota, features }) => {
+                  const price =
+                    PLANS.find(
+                      (p) => p.slug === plan.toLowerCase()
+                    )?.price.amount || 0
+
+                  return (
+                    <div
+                      key={plan}
+                      className={cn(
+                        'relative rounded-2xl bg-white shadow-lg',
+                        {
+                          'border-2 border-blue-600 shadow-blue-200':
+                            plan === 'Pro',
+                          'border border-gray-200':
+                            plan !== 'Pro',
+                        }
+                      )}>
+                      {plan === 'Pro' && (
+                        <div className='absolute -top-5 left-0 right-0 mx-auto w-32 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 px-3 py-2 text-sm font-medium text-white'>
+                          Recomendado
+                        </div>
+                      )}
+
+                      <div className='p-5 flex flex-col items-center'>
+                        <h3 className='my-3 text-center font-display text-3xl font-bold'>
+                          {plan}
+                        </h3>
+                        <p className='text-gray-500'>
+                          {tagline}
+                        </p>
+                        <p className='my-5 font-display text-6xl font-semibold'>
+                          R$ {price}
+                        </p>
+                        <p className='text-gray-500'>
+                          por mês
+                        </p>
+                      </div>
+
+                      <div className='flex h-20 items-center justify-center border-b border-t border-gray-200 bg-gray-50'>
+                        <div className='flex items-center space-x-1'>
+                          <p>
+                            {quota.toLocaleString()} PDFs/mês
+                            incluído
+                          </p>
+
+                          <Tooltip delayDuration={300}>
+                            <TooltipTrigger className='cursor-default ml-1.5'>
+                              <HelpCircle className='h-4 w-4 text-zinc-500' />
+                            </TooltipTrigger>
+                            <TooltipContent className='w-80 p-2'>
+                              Quantos PDFs você pode subir por mês.
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </div>
+
+                      <ul className='my-10 space-y-5 px-8'>
+                        {features.map(
+                          ({ text, footnote, negative }) => (
+                            <li
+                              key={text}
+                              className='flex space-x-5'>
+                              <div className='flex-shrink-0'>
+                                {negative ? (
+                                  <Minus className='h-6 w-6 text-gray-300' />
+                                ) : (
+                                  <Check className='h-6 w-6 text-blue-500' />
+                                )}
+                              </div>
+                              {footnote ? (
+                                <div className='flex items-center space-x-1'>
+                                  <p
+                                    className={cn(
+                                      'text-gray-600',
+                                      {
+                                        'text-gray-400':
+                                          negative,
+                                      }
+                                    )}>
+                                    {text}
+                                  </p>
+                                  <Tooltip
+                                    delayDuration={300}>
+                                    <TooltipTrigger className='cursor-default ml-1.5'>
+                                      <HelpCircle className='h-4 w-4 text-zinc-500' />
+                                    </TooltipTrigger>
+                                    <TooltipContent className='w-80 p-2'>
+                                      {footnote}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </div>
+                              ) : (
+                                <p
+                                  className={cn(
+                                    'text-gray-600',
+                                    {
+                                      'text-gray-400':
+                                        negative,
+                                    }
+                                  )}>
+                                  {text}
+                                </p>
+                              )}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                      <div className='border-t border-gray-200' />
+                      <div className='p-5'>
+                        {plan === 'Free' ? (
+                          <Link
+                            href={
+                              user ? '/dashboard' : '/sign-in'
+                            }
+                            className={buttonVariants({
+                              className: 'w-full',
+                              variant: 'secondary',
+                            })}>
+                            {user ? 'Selecionar' : 'Selecionar'}
+                            <ArrowRight className='h-5 w-5 ml-1.5' />
+                          </Link>
+                        ) : user ? (
+                          <UpgradeButton />
+                        ) : (
+                          <Link
+                            href='/sign-in'
+                            className={buttonVariants({
+                              className: 'w-full',
+                            })}>
+                            {user ? 'Atualizar agora' : 'Escolher esse'}
+                            <ArrowRight className='h-5 w-5 ml-1.5' />
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  )
+                }
+              )}
+            </TooltipProvider>
+          </div>
+        </MaxWidthWrapper>
+
+        <div>
+          <div style={{ marginTop: '10rem' }} className='flex flex-col w-full items-center justify-center mb-10 '>
+            <h1 className='text-6xl font-bold sm:text-7xl'>
+              FAQ
+            </h1>
+            <p className='mt-5 text-gray-600 sm:text-lg'>
+              Responderemos suas duvidas.
+            </p>
+          </div>
+          <Accordion type="single" collapsible className="w-full p-5">
+            <AccordionItem value="item-1" className='p-5'>
+              <AccordionTrigger>Existe algum limite de perguntas sobre os documentos?</AccordionTrigger>
+              <AccordionContent className='mt-4'>
+                Por equanto, não adicionamos limites de perguntas e respostas.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2" className='p-5'>
+              <AccordionTrigger>Funciona para qualquer documento?</AccordionTrigger>
+              <AccordionContent className='mt-4'>
+                Por enquanto, só estamos funcionando com PDF.
+                Em breve iremos atualizar para funcionarmos com qualquer tipo de documento e imagem.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3" className='p-5'>
+              <AccordionTrigger>Funciona no celular?</AccordionTrigger>
+              <AccordionContent className='mt-4'>
+                Sim, você pode acessar o TalkPdf no navegador do seu celular
+                utiliza-lo tranquilamente.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+
       </div>
+      <footer style={{background: 'rgb(30 41 59 /1)'}} className=' text-white bg-slate-800 flex items-center justify-center p-5 '>
+        <span>Feito por <span className='font-bold'>Matheus Almeida Innovation</span></span>
+      </footer>
     </>
   )
 }
