@@ -4,11 +4,7 @@ import { headers } from 'next/headers'
 import type Stripe from 'stripe'
 
 // Desativa o processamento automático do corpo no Next.js
-export const config = {
-  api: {
-    bodyParser: false, // Isso garante que o corpo não seja convertido para JSON automaticamente
-  },
-}
+export const runtime = 'edge'
 
 export async function POST(request: Request) {
   const body = await request.text()
