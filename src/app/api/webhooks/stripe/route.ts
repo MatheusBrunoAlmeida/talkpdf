@@ -7,7 +7,9 @@ import { buffer } from 'micro';
 
 export async function POST(request: Request) {
   const signature = headers().get('stripe-signature') ?? '';
-  const rawBody = await request.arrayBuffer();
+  const rawBody = await request.text();
+
+  console.log(rawBody)
 
   if (!rawBody) {
     throw new Error('Body is empty or not raw');
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
   try {
     // Verifica a assinatura do webhook com o corpo cru
     event = await stripe.webhooks.constructEventAsync(
-      Buffer.from(rawBody),
+      rawBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
     );
