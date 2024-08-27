@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   try {
     // Verifica a assinatura do webhook com o corpo cru
     event = await stripe.webhooks.constructEventAsync(
-      body,
+      rawBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
     )
