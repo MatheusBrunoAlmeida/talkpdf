@@ -8,7 +8,7 @@ interface UpgradeButtonProps {
   plan: any
 }
 
-const UpgradeButton = ({ plan }:UpgradeButtonProps) => {
+const UpgradeButton = ({ plan }:any) => {
 
   const {mutate: createStripeSession} = trpc.createStripeSession.useMutation({
     onSuccess: ({url}) => {

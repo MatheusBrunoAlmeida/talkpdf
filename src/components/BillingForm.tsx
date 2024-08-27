@@ -92,7 +92,8 @@ const BillingForm = ({
         onSubmit={(e) => {
           e.preventDefault()
           if (!subscriptionPlan.isSubscribed) {
-            createStripeSession()
+            // @ts-ignore
+            createStripeSession({ plan: subscriptionPlan.name })
           }
         }}>
         <Card>
@@ -145,7 +146,7 @@ const BillingForm = ({
                 </Dialog>
               </>
             ) : (
-              <Button onClick={() => window.location.href='/pricing'} disabled={isLoading}>
+              <Button onClick={() => window.location.href = '/pricing'} disabled={isLoading}>
                 {(isLoading) ? (
                   <Loader2 className='mr-4 h-4 w-4 animate-spin' />
                 ) : null}
