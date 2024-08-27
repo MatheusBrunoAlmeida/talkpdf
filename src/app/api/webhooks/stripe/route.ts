@@ -9,22 +9,28 @@ export async function POST(request: Request) {
 
   let event: Stripe.Event
 
-  try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET || ''
-    )
+  event = stripe.webhooks.constructEvent(
+    body,
+    signature,
+    process.env.STRIPE_WEBHOOK_SECRET || ''
+  )
 
-    console.log(event)
-  } catch (err) {
-    return new Response(
-      `Webhook Error: ${
-        err instanceof Error ? err.message : 'Unknown Error'
-      }`,
-      { status: 400 }
-    )
-  }
+  // try {
+  //   event = stripe.webhooks.constructEvent(
+  //     body,
+  //     signature,
+  //     process.env.STRIPE_WEBHOOK_SECRET || ''
+  //   )
+
+  //   console.log(event)
+  // } catch (err) {
+  //   return new Response(
+  //     `Webhook Error: ${
+  //       err instanceof Error ? err.message : 'Unknown Error'
+  //     }`,
+  //     { status: 400 }
+  //   )
+  // }
 
   const session = event.data
     .object as Stripe.Checkout.Session
