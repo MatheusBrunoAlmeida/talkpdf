@@ -8,7 +8,7 @@ import '../output.css'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@radix-ui/react-tooltip'
 import { PLANS } from '@/config/stripe'
 import { cn } from '@/lib/utils'
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import { RegisterLink, getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import UpgradeButton from '@/components/UpgradeButton'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { NextSeo } from 'next-seo'
@@ -128,16 +128,16 @@ export default function Home() {
           aproveitando o poder da IA.
         </p>
 
-        <Link
+        <RegisterLink
           className={buttonVariants({
             size: 'lg',
             className: 'mt-5',
           })}
-          href='/dashboard'
+          // href='/dashboard'
           target='_blank'>
           Teste grátis{' '}
           <ArrowRight className='ml-2 h-5 w-5' />
-        </Link>
+        </RegisterLink>
       </MaxWidthWrapper>
 
       {/* value proposition section */}
