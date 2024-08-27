@@ -3,21 +3,24 @@ import { stripe } from '@/lib/stripe'
 import { headers } from 'next/headers'
 import type Stripe from 'stripe'
 
-
 export async function POST(request: Request) {
   const signature = request.headers.get('stripe-signature') ?? ''
-  const body = await request.text()
+  const rawBody = await request.text();
 
-  let event
+  if (!rawBody) {
+    throw new Error('Body is empty or not raw');
+  }
+
+  let event: Stripe.Event
 
   try {
     // Verifica a assinatura do webhook com o corpo cru
     event = await stripe.webhooks.constructEventAsync(
-      body,
+      rawBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
     )
-    
+
     // Processa o evento do Stripe
     const session = event.data.object as Stripe.Checkout.Session
 
@@ -68,8 +71,7 @@ export async function POST(request: Request) {
     // Captura qualquer erro relacionado à verificação da assinatura ou ao processamento do evento
     console.error(`Webhook Error: ${err instanceof Error ? err.message : 'Unknown Error'}`)
     return new Response(
-      `Webhook Error: ${
-        err instanceof Error ? err.message : 'Unknown Error'
+      `Webhook Error: ${err instanceof Error ? err.message : 'Unknown Error'
       }`,
       { status: 400 }
     )
