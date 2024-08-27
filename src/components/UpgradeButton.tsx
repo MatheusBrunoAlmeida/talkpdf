@@ -4,7 +4,11 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from './ui/button'
 import { trpc } from '@/app/_trpc/client'
 
-const UpgradeButton = () => {
+interface UpgradeButtonProps {
+  plan: any
+}
+
+const UpgradeButton = ({ plan }:UpgradeButtonProps) => {
 
   const {mutate: createStripeSession} = trpc.createStripeSession.useMutation({
     onSuccess: ({url}) => {
@@ -13,7 +17,7 @@ const UpgradeButton = () => {
   })
 
   return (
-    <Button onClick={() => createStripeSession()} className='w-full'>
+    <Button onClick={() => createStripeSession({ plan })} className='w-full'>
       Atualizar agora <ArrowRight className='h-5 w-5 ml-1.5' />
     </Button>
   )

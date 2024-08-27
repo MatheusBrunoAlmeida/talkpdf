@@ -24,6 +24,8 @@ import {
   DialogTitle,
 } from './ui/dialog'
 import { api } from '@/lib/axios'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 interface BillingFormProps {
   subscriptionPlan: Awaited<
@@ -54,34 +56,34 @@ const BillingForm = ({
       },
     })
 
-    const { mutate: cancelSubscription } = trpc.cancelSubiscription.useMutation({
-      onSuccess: (response) => {
-        console.log(response)
-        toast({
-          title: 'Assinatura cancelada com sucesso',
-          description: 'Sua assinatura foi cancelada.',
-        })
+  const { mutate: cancelSubscription } = trpc.cancelSubiscription.useMutation({
+    onSuccess: (response) => {
+      console.log(response)
+      toast({
+        title: 'Assinatura cancelada com sucesso',
+        description: 'Sua assinatura foi cancelada.',
+      })
 
-        window.location.reload()
-        setIsConfirmingCancel(false)
-      },
-      onError: (error) => {
-        toast({
-          title: 'Erro',
-          description: 'Houve um problema ao cancelar sua assinatura.',
-          variant: 'destructive',
-        })
-        setIsCanceling(false)
-      },
-    })
-    
-    
+      window.location.reload()
+      setIsConfirmingCancel(false)
+    },
+    onError: (error) => {
+      toast({
+        title: 'Erro',
+        description: 'Houve um problema ao cancelar sua assinatura.',
+        variant: 'destructive',
+      })
+      setIsCanceling(false)
+    },
+  })
 
-    const handleCancelSubscription = async () => {
-      setIsCanceling(true)
-      // @ts-ignore
-      cancelSubscription({ subscriptionId: subscriptionPlan.stripeSubscriptionId })
-    }
+
+
+  const handleCancelSubscription = async () => {
+    setIsCanceling(true)
+    // @ts-ignore
+    cancelSubscription({ subscriptionId: subscriptionPlan.stripeSubscriptionId })
+  }
 
   return (
     <MaxWidthWrapper className='max-w-5xl'>
@@ -143,7 +145,7 @@ const BillingForm = ({
                 </Dialog>
               </>
             ) : (
-              <Button type='submit' disabled={isLoading}>
+              <Button onClick={() => window.location.href='/pricing'} disabled={isLoading}>
                 {(isLoading) ? (
                   <Loader2 className='mr-4 h-4 w-4 animate-spin' />
                 ) : null}
