@@ -84,7 +84,7 @@ const UploadDropzone = ({
 
         console.log(pdfPages)
 
-        if(pdfPages > userPlan?.pagesPerPdf ){
+        if (pdfPages > userPlan?.pagesPerPdf) {
           toast({
             title: 'Seu documento tem mais páginas do que o permitido',
             description: 'Atualize para um plano máior para poder subir documentos com mais páginas',
@@ -100,7 +100,7 @@ const UploadDropzone = ({
 
         console.log(fileSize)
 
-        if(fileSize >  userPlan.sizePdf){
+        if (fileSize > userPlan.sizePdf) {
           toast({
             title: 'Seu documento tem um tamanho maior do que o permitido',
             description: 'Atualize para um plano máior para poder subir documentos com um tamanho maior',
@@ -139,7 +139,8 @@ const UploadDropzone = ({
         setUploadProgress(100)
 
         startPolling({ key })
-      }}>
+      }
+      }>
       {({ getRootProps, getInputProps, acceptedFiles }) => (
         <div
           {...getRootProps()}
@@ -195,8 +196,8 @@ const UploadDropzone = ({
               <input
                 {...getInputProps()}
                 type='file'
-                id='dropzone-file'
-                className='hidden'
+                // id='dropzone-file'
+                // className='hidden'
               />
             </label>
           </div>
@@ -229,7 +230,7 @@ const UploadButton = ({
       <DialogTrigger
         onClick={() => setIsOpen(true)}
         asChild>
-          {/* @ts-ignore */}
+        {/* @ts-ignore */}
         <Button disabled={isDisabled}>Carregar PDF</Button>
       </DialogTrigger>
 

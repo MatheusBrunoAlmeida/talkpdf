@@ -1,13 +1,14 @@
 'use client'
 
 import { RegisterLink } from '@kinde-oss/kinde-auth-nextjs/server'
-import { ArrowRight, Menu } from 'lucide-react'
+import { ArrowRight, Gem, Menu } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { buttonVariants } from './ui/button'
+import { getUserSubscriptionPlan } from '@/lib/stripe'
 
-const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
+const MobileNav = ({ isAuth, user }: { isAuth: boolean, user: any }) => {
   const [isOpen, setOpen] = useState<boolean>(false)
 
   const toggleOpen = () => setOpen((prev) => !prev)
@@ -80,7 +81,18 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                     Dashboard
                   </Link>
                 </li>
+
                 <li className='my-3 h-px w-full bg-gray-300' />
+
+                <li>
+                  <Link href='/dashboard/billing' className='flex items-center w-full font-semibold'>
+                    Trocar plano
+                    <Gem className='text-blue-600 h-4 w-4 ml-1.5' />
+                  </Link>
+                </li>
+
+                <li className='my-3 h-px w-full bg-gray-300' />
+
                 <li>
                   <Link
                     className='flex items-center w-full font-semibold'
