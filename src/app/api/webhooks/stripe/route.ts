@@ -2,10 +2,13 @@ import { db } from '@/db'
 import { stripe } from '@/lib/stripe'
 import { headers } from 'next/headers'
 import type Stripe from 'stripe'
+import { buffer } from 'micro';
 
 export async function POST(request: Request) {
   const signature = request.headers.get('stripe-signature') ?? ''
   const rawBody = await request.text();
+  // @ts-ignore
+  const body = await buffer(request)
 
   if (!rawBody) {
     throw new Error('Body is empty or not raw');
@@ -16,7 +19,7 @@ export async function POST(request: Request) {
   try {
     // Verifica a assinatura do webhook com o corpo cru
     event = await stripe.webhooks.constructEventAsync(
-      rawBody,
+      body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
     )
