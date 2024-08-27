@@ -94,6 +94,14 @@ const MobileNav = ({ isAuth, user }: { isAuth: boolean, user: any }) => {
                 <li className='my-3 h-px w-full bg-gray-300' />
 
                 <li>
+                  <Link href='mailto:matheusbrunoalmeida.dev@gmail.com' className='flex items-center w-full font-semibold'>
+                    Suporte
+                  </Link>
+                </li>
+
+                <li className='my-3 h-px w-full bg-gray-300' />
+
+                <li>
                   <Link
                     className='flex items-center w-full font-semibold'
                     href='/sign-out'>

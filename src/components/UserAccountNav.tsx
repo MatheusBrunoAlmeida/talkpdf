@@ -88,6 +88,10 @@ const UserAccountNav = async ({
           )}
         </DropdownMenuItem>
 
+        <DropdownMenuItem asChild>
+          <Link href='mailto:matheusbrunoalmeida.dev@gmail.com'>Suporte</Link>
+        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
 
         <DropdownMenuItem className='cursor-pointer flex flex-row'>
