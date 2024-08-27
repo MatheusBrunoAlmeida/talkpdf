@@ -3,14 +3,12 @@ import { stripe } from '@/lib/stripe'
 import { headers } from 'next/headers'
 import type Stripe from 'stripe'
 
-// Desativa o processamento automático do corpo no Next.js
-export const runtime = 'edge'
 
 export async function POST(request: Request) {
+  const signature = request.headers.get('stripe-signature') ?? ''
   const body = await request.text()
-  const signature = headers().get('Stripe-Signature') ?? ''
 
-  let event: Stripe.Event
+  let event
 
   try {
     // Verifica a assinatura do webhook com o corpo cru
