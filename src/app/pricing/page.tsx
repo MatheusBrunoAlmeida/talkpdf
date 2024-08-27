@@ -81,12 +81,41 @@ const Page = () => {
         },
       ],
     },
+    {
+      plan: 'Premium',
+      tagline: 'Maior quantidade de documentos.',
+      quota: PLANS.find((p) => p.slug === 'premium')!.quota,
+      features: [
+        {
+          text: '300 Páginas por PDF',
+          footnote:
+            'O máximo de paginas por PDF.',
+        },
+        {
+          text: '80MB permitido por arquivo.',
+          footnote:
+            'O máximo do tamnho do arquivo PDF permitido.',
+        },
+        {
+          text: 'Disponivel para celular e Desktop',
+        },
+        {
+          text: 'Respostas maiores',
+          footnote:
+            'Tamanho da mensagem que pode ser obtida sobre seu arquivo',
+        },
+        {
+          text: 'Prioridade no suporte',
+        },
+      ],
+    },
   ]
 
   return (
     <>
-      <MaxWidthWrapper className='mb-8 mt-24 text-center max-w-5xl'>
-        <div className='mx-auto mb-10 sm:max-w-lg'>
+      {/* <MaxWidthWrapper className='!px-1 mb-8 mt-24 text-center w-full'> */}
+      <div className='px-10'>
+        <div style={{marginTop: '5rem'}} className='mx-auto flex flex-col items-center mb-10 sm:max-w-lg'>
           <h1 className='text-6xl font-bold sm:text-7xl'>
             Preço
           </h1>
@@ -95,7 +124,7 @@ const Page = () => {
           </p>
         </div>
 
-        <div className='pt-12 grid grid-cols-1 gap-10 lg:grid-cols-2'>
+        <div className='pt-12 grid grid-cols-1 md:grid-cols-2 gap-10 lg:grid-cols-3 w-full mb-32'>
           <TooltipProvider>
             {pricingItems.map(
               ({ plan, tagline, quota, features }) => {
@@ -108,7 +137,7 @@ const Page = () => {
                   <div
                     key={plan}
                     className={cn(
-                      'relative rounded-2xl bg-white shadow-lg',
+                      'relative !w-96 rounded-2xl bg-white shadow-lg',
                       {
                         'border-2 border-blue-600 shadow-blue-200':
                           plan === 'Pro',
@@ -239,7 +268,8 @@ const Page = () => {
             )}
           </TooltipProvider>
         </div>
-      </MaxWidthWrapper>
+      </div>
+      {/* </MaxWidthWrapper> */}
     </>
   )
 }
