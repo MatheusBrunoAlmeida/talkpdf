@@ -82,7 +82,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     session.subscription as string
   )
 
-  const value = jsonBody.data.object.amount_paid /  10
+  const value = jsonBody.data.object.amount_paid /  100
 
   const plan = PLANS.find((plan) => plan.price.amount === value)
 
