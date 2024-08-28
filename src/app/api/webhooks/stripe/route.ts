@@ -9,19 +9,26 @@ export async function POST(request: Request) {
 
   let event: Stripe.Event
 
-  // Verifica se o corpo realmente é uma string (o que ele deve ser)
+  // Ensure body is a string
   if (typeof body !== 'string') {
     body = await request.text()
   }
-  // Vercel specific: Handle Vercel's serverless function body parsing
+
+  // Handle JSON content type
   if (request.headers.get('content-type') === 'application/json') {
-    body = JSON.stringify(await request.json())
+    try {
+      const jsonBody = await request.json()
+      body = JSON.stringify(jsonBody)
+    } catch (error) {
+      console.error('Error parsing JSON body:', error)
+      return new Response('Invalid JSON', { status: 400 })
+    }
   }
 
   // Log the received webhook for debugging
   console.log('Received Stripe webhook:', {
     headers: Object.fromEntries(request.headers),
-    body: body.substring(0, 500) + (body.length > 500 ? '...' : ''), // Log first 500 chars
+    body: body.substring(0, 500) + (body.length > 500 ? '...' : ''),
   })
 
   try {
