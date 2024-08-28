@@ -21,7 +21,7 @@ export const PLANS = [
     price: {
       amount: 25,
       priceIds: {
-        test: '',
+        test: 'price_1Ps9Z8BHCJHsCGMUTOKagpNa',
         production: 'price_1Ps9Z8BHCJHsCGMUTOKagpNa',
       },
     },
@@ -35,7 +35,7 @@ export const PLANS = [
     price: {
       amount: 49,
       priceIds: {
-        test: '',
+        test: 'price_1PsF0yBHCJHsCGMUPlW781uy',
         production: 'price_1PsF0yBHCJHsCGMUPlW781uy',
       },
     },
