@@ -59,7 +59,7 @@ export const appRouter = router({
       async ({ ctx, input }) => {
         const { userId } = ctx
 
-        const billingUrl = absoluteUrl('/dashboard/billing')
+        const billingUrl = absoluteUrl('/dashboard')
 
         if (!userId)
           throw new TRPCError({ code: 'UNAUTHORIZED' })

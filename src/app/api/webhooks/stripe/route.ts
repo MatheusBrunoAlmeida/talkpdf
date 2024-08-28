@@ -85,7 +85,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
 
   const value = jsonBody.data.object.amount_paid /  10
 
-  const plan = PLANS.find((plan) => plan.price.amount === value)
+  const plan = PLANS.filter((plan) => plan.price.amount === value)
+
+  console.log('plan', plan)
 
   await db.user.update({
     where: {
@@ -98,7 +100,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       stripeCurrentPeriodEnd: new Date(
         subscription.current_period_end * 1000
       ),
-      userPlan: plan?.slug,
+      userPlan: plan[0].slug,
     },
   })
 }
