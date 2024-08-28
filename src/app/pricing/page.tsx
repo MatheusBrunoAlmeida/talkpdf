@@ -59,7 +59,7 @@ const Page = () => {
       quota: PLANS.find((p) => p.slug === 'pro')!.quota,
       features: [
         {
-          text: '25 Páginas por PDF',
+          text: '35 Páginas por PDF',
           footnote:
             'O máximo de paginas por PDF.',
         },

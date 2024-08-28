@@ -13,6 +13,16 @@ export async function POST(request: Request) {
   if (typeof body !== 'string') {
     body = await request.text()
   }
+  // Vercel specific: Handle Vercel's serverless function body parsing
+  if (request.headers.get('content-type') === 'application/json') {
+    body = JSON.stringify(await request.json())
+  }
+
+  // Log the received webhook for debugging
+  console.log('Received Stripe webhook:', {
+    headers: Object.fromEntries(request.headers),
+    body: body.substring(0, 500) + (body.length > 500 ? '...' : ''), // Log first 500 chars
+  })
 
   try {
     event = await stripe.webhooks.constructEventAsync(
