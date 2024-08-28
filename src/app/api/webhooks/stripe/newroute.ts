@@ -7,7 +7,7 @@ export const runtime = 'edge'
 
 export async function POST(request: Request) {
   const body = await request.text()
-  const signature = headers().get('Stripe-Signature') ?? ''
+  const signature = headers().get('stripe-signature') ?? ''
 
   let event: Stripe.Event
 
