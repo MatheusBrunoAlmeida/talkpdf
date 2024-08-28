@@ -9,10 +9,32 @@ export async function POST(request: Request) {
   let body = await request.text()
   const signature = headers().get('stripe-signature') ?? ''
 
-  let event: Stripe.Event
-
+  // Ensure body is a string
   if (typeof body !== 'string') {
     body = await request.text()
+  }
+
+  // Parse the body as JSON
+  let event: Stripe.Event
+  try {
+    event = JSON.parse(body) as Stripe.Event
+  } catch (error) {
+    console.error('Error parsing webhook body:', error)
+    return new Response('Invalid JSON', { status: 400 })
+  }
+
+  // Handle different event types
+  switch (event.type) {
+    case 'checkout.session.completed':
+      const session = event.data.object as Stripe.Checkout.Session
+      // Handle checkout session completed
+      break
+    case 'invoice.payment_succeeded':
+      const invoice = event.data.object as Stripe.Invoice
+      // Handle invoice payment succeeded
+      break
+    default:
+      console.log(`Unhandled event type: ${event.type}`)
   }
 
   // Log the raw body and content-type for debugging
