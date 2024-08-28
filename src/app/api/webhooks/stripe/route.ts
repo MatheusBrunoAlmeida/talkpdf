@@ -59,10 +59,22 @@ export async function POST(request: Request) {
   }
 
   // Redirect to the billing route
-  return new Response(null, { 
-    status: 303, 
-    headers: { 'Location': '/dashboard/billing' } 
-  })
+  // The redirect doesn't work in this context because this is a server-side API route
+  // We can't perform client-side redirects from here
+  // Instead, we should handle the webhook event and update the user's subscription status
+  
+  // const invoice = jsonBody.data.object as Stripe.Invoice;
+  // await handleInvoicePaymentSucceeded(invoice);
+
+  // Return a success response to Stripe
+  return new Response(JSON.stringify({ received: true }), { 
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
+  // return new Response(null, { 
+  //   status: 303, 
+  //   headers: { 'Location': '/dashboard/billing' } 
+  // })
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {

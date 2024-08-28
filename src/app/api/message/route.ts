@@ -96,8 +96,6 @@ export const POST = async (req: NextRequest) => {
       4
     )
 
-    console.log(results)
-
     // Preparar o prompt para a API do Cohere
     const prompt = `
       Use o contexto fornecido ou a conversa anterior, se necessário, para responder à pergunta do usuário. Responda em markdown.
@@ -122,14 +120,13 @@ export const POST = async (req: NextRequest) => {
     const generateResponse = await cohere.generate({
       model: 'command-xlarge-nightly', // Use o modelo adequado da Cohere
       prompt: prompt,
-      maxTokens: 150, // Ajuste conforme necessário
-      stopSequences: ["\n"],
-      temperature: 0,
+      maxTokens: 800, // Aumentado para permitir respostas mais longas
+      stopSequences: [], // Removido para não limitar a resposta
+      temperature: 0.7, // Aumentado para permitir mais criatividade
+      k: 0, // Desativa a amostragem top-k
+      p: 1, // Desativa a amostragem nucleus
+      presencePenalty: 0.5, // Adiciona penalidade de presença para incentivar novos tópicos
     })
-
-    // if (generateResponse.status !== 200 || !generateResponse.body.generations) {
-    //   return new Response('Failed to generate response', { status: 500 })
-    // }
 
     const responseText = generateResponse.generations[0].text.trim()
 
