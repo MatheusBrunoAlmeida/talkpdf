@@ -14,6 +14,9 @@ import {
   stripe,
 } from '@/lib/stripe'
 import { PLANS } from '@/config/stripe'
+import { CohereEmbeddings } from '@langchain/cohere'
+import { getPineconeClient } from '@/lib/pinecone'
+import { PineconeStore } from '@langchain/pinecone'
 
 export const appRouter = router({
   authCallback: publicProcedure.query(async () => {
@@ -228,7 +231,25 @@ export const appRouter = router({
         },
       })
 
+      const cohereEmbeddings = new CohereEmbeddings({
+        apiKey: process.env.COHERE_API_KEY,
+        model: 'embed-multilingual-v2.0',
+      })
+
+      const pinecone = await getPineconeClient()
+      const pineconeIndex = pinecone.Index('talkpdf')
+      const vectorStore = await PineconeStore.fromExistingIndex(
+        cohereEmbeddings,
+        {
+          pineconeIndex,
+          namespace: file?.id,
+        }
+      )
+
       if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+
+      // const results = await vectorStore.similaritySearch(message, 4)
+
 
       return file
     }),
