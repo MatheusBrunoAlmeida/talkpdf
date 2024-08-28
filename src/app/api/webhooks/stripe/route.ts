@@ -46,12 +46,12 @@ export async function POST(request: Request) {
       // Handle invoice payment succeeded
       break
     default:
-      console.log(`Unhandled event type: ${event.type}`)
+      // console.log(`Unhandled event type: ${event.type}`)
   }
 
   // Log the raw body and content-type for debugging
-  console.log('Webhook raw body:', body)
-  console.log('Content-Type:', request.headers.get('content-type'))
+  // console.log('Webhook raw body:', body)
+  // console.log('Content-Type:', request.headers.get('content-type'))
 
   // // Verify the event type
   // if (jsonBody.type !== 'invoice.payment_succeeded') {
@@ -82,9 +82,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     session.subscription as string
   )
 
-  const value = jsonBody.data.object.amount_paid /  100
+  const value = Number(jsonBody.data.object.amount_total) /  100
+  console.log('value', jsonBody)
 
-  const plan = PLANS.find((plan) => plan.price.amount === value)
+  const plan = PLANS.filter((plan) => plan.price.amount === value)
 
   console.log('plan', plan)
 
@@ -99,7 +100,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       stripeCurrentPeriodEnd: new Date(
         subscription.current_period_end * 1000
       ),
-      userPlan: plan?.slug,
+      userPlan: plan[0].slug,
     },
   })
 }
