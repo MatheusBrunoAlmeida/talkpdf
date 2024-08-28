@@ -91,10 +91,14 @@ export const POST = async (req: NextRequest) => {
       }
     )
 
+    console.log("Inicio da busca de embeddings");
+
     const results = await vectorStore.similaritySearch(
       message,
       4
     )
+
+    console.log("Embeddings buscados com sucesso");
 
     // Preparar o prompt para a API do Cohere
     const prompt = `
@@ -129,6 +133,8 @@ export const POST = async (req: NextRequest) => {
     })
 
     const responseText = generateResponse.generations[0].text.trim()
+
+    console.log("Resposta gerada com sucesso", responseText);
 
     // Salva a resposta gerada no banco de dados
     await db.message.create({
