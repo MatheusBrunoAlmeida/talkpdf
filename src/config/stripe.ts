@@ -15,7 +15,7 @@ export const PLANS = [
   {
     name: 'Pro',
     slug: 'pro',
-    quota: 20,
+    quota: 50,
     sizePdf: 16,
     pagesPerPdf: 35,
     price: {
@@ -29,7 +29,7 @@ export const PLANS = [
   {
     name: 'Premium',
     slug: 'premium',
-    quota: 50,
+    quota: 80,
     sizePdf: 80,
     pagesPerPdf: 300,
     price: {
