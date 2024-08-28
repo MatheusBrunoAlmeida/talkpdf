@@ -4,23 +4,25 @@ import { headers } from 'next/headers'
 import type Stripe from 'stripe'
 
 export async function POST(request: Request) {
-  const body = await request
+  let body = await request.text()
   const signature = headers().get('Stripe-Signature') ?? ''
 
   let event: Stripe.Event
 
+  // Verifica se o corpo realmente é uma string (o que ele deve ser)
+  if (typeof body !== 'string') {
+    body = await request.text()
+  }
+
   try {
     event = await stripe.webhooks.constructEventAsync(
-      String(body),
+      body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
     )
-
-    console.log(event)
   } catch (err) {
     return new Response(
-      `Webhook Error on construct: ${
-        err instanceof Error ? err.message : 'Unknown Error'
+      `Webhook Error on construct: ${err instanceof Error ? err.message : 'Unknown Error'
       }`,
       { status: 400 }
     )
@@ -29,7 +31,7 @@ export async function POST(request: Request) {
   const session = event.data
     .object as Stripe.Checkout.Session
 
-    console.log('session',session)
+  console.log('session', session)
 
   if (!session?.metadata?.userId) {
     return new Response(null, {
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
         session.subscription as string
       )
 
-      console.log('web hook called')
+    console.log('web hook called')
 
     await db.user.update({
       where: {
