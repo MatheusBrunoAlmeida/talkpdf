@@ -27,10 +27,13 @@ export async function POST(request: Request) {
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object as Stripe.Checkout.Session
+      await handleCheckoutSessionCompleted(session)
+
       // Handle checkout session completed
       break
     case 'invoice.payment_succeeded':
       const invoice = event.data.object as Stripe.Invoice
+      await handleInvoicePaymentSucceeded(invoice)
       // Handle invoice payment succeeded
       break
     default:
@@ -130,7 +133,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   })
 }
 
-async function handleInvoicePaymentSucceeded(session: Stripe.Checkout.Session) {
+async function handleInvoicePaymentSucceeded(session: Stripe.Invoice) {
   const subscription = await stripe.subscriptions.retrieve(
     session.subscription as string
   )
