@@ -12,7 +12,7 @@
 
 //   let event: Stripe.Event
 
-//   // Ensure body is a string
+  // Ensure body is a string and handle raw payload
 //   if (typeof body !== 'string') {
 //     body = await request.text()
 //   }
@@ -114,10 +114,25 @@ import type Stripe from 'stripe'
 export const runtime = 'edge'
 
 export async function POST(request: Request) {
-  const body = await request.text()
+  let body = await request.text()
   const signature = headers().get('Stripe-Signature') ?? ''
 
   let event: Stripe.Event
+
+  if (typeof body !== 'string') {
+    body = await request.text()
+  }
+
+  // Do not parse JSON, use raw body
+  if (request.headers.get('content-type') === 'application/json') {
+    console.warn('Received JSON content-type, but using raw body for webhook')
+  }
+
+  // Log the received webhook for debugging
+  console.log('Received Stripe webhook:', {
+    signature,
+    bodyLength: body.length,
+  })
 
   try {
     event = await stripe.webhooks.constructEventAsync(
