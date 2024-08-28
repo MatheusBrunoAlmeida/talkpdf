@@ -1,3 +1,4 @@
+import { PLANS } from '@/config/stripe'
 import { db } from '@/db'
 import { stripe } from '@/lib/stripe'
 import { headers } from 'next/headers'
@@ -21,11 +22,21 @@ export async function POST(request: Request) {
     return new Response('Invalid JSON', { status: 400 })
   }
 
+  let jsonBody;
+  try {
+    jsonBody = JSON.parse(body);
+    console.log('Parsed JSON body:', jsonBody);
+  } catch (error) {
+    console.error('Error parsing JSON body:', error);
+    return new Response('Invalid JSON', { status: 400 });
+  }
+
+
   // Handle different event types
   switch (event.type) {
     case 'checkout.session.completed':
       const session = event.data.object as Stripe.Checkout.Session
-      await handleCheckoutSessionCompleted(session)
+      await handleCheckoutSessionCompleted(session, jsonBody)
 
       // Handle checkout session completed
       break
@@ -42,21 +53,11 @@ export async function POST(request: Request) {
   console.log('Webhook raw body:', body)
   console.log('Content-Type:', request.headers.get('content-type'))
 
-  // Parse the body as JSON
-  let jsonBody;
-  try {
-    jsonBody = JSON.parse(body);
-    console.log('Parsed JSON body:', jsonBody);
-  } catch (error) {
-    console.error('Error parsing JSON body:', error);
-    return new Response('Invalid JSON', { status: 400 });
-  }
-
-  // Verify the event type
-  if (jsonBody.type !== 'invoice.payment_succeeded') {
-    console.log(`Unhandled event type ${jsonBody.type}`);
-    return new Response(null, { status: 200 });
-  }
+  // // Verify the event type
+  // if (jsonBody.type !== 'invoice.payment_succeeded') {
+  //   console.log(`Unhandled event type ${jsonBody.type}`);
+  //   return new Response(null, { status: 200 });
+  // }
 
   // Redirect to the billing route
   // The redirect doesn't work in this context because this is a server-side API route
@@ -77,10 +78,14 @@ export async function POST(request: Request) {
   // })
 }
 
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, jsonBody: any) {
   const subscription = await stripe.subscriptions.retrieve(
     session.subscription as string
   )
+
+  const value = jsonBody.data.object.amount_paid /  10
+
+  const plan = PLANS.find((plan) => plan.price.amount === value)
 
   await db.user.update({
     where: {
@@ -93,6 +98,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       stripeCurrentPeriodEnd: new Date(
         subscription.current_period_end * 1000
       ),
+      userPlan: plan?.slug,
     },
   })
 }
