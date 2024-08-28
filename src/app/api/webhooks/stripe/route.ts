@@ -68,9 +68,8 @@ export async function POST(request: Request) {
   // await handleInvoicePaymentSucceeded(invoice);
 
   // Return a success response to Stripe
-  return new Response(JSON.stringify({ received: true }), { 
+  return new Response(null, { 
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
   });
   // return new Response(null, { 
   //   status: 303, 
@@ -85,7 +84,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
 
   const value = jsonBody.data.object.amount_paid /  10
 
-  const plan = PLANS.filter((plan) => plan.price.amount === value)
+  const plan = PLANS.find((plan) => plan.price.amount === value)
 
   console.log('plan', plan)
 
@@ -100,7 +99,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       stripeCurrentPeriodEnd: new Date(
         subscription.current_period_end * 1000
       ),
-      userPlan: plan[0].slug,
+      userPlan: plan?.slug,
     },
   })
 }
