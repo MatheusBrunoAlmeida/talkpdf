@@ -59,54 +59,54 @@ export async function POST(request: Request) {
   }
 
   // Extract relevant information from the event
-  const session = jsonBody.data.object;
+  // const session = jsonBody.data.object;
 
   // Ensure we're using the raw body, not parsed JSON
-  if (request.headers.get('content-type') === 'application/json') {
-    console.warn('Received JSON content-type, but using raw body for webhook')
-    try {
-      // Attempt to parse and stringify to normalize any potential JSON
-      body = JSON.stringify(JSON.parse(body))
-    } catch (error) {
-      console.error('Error parsing JSON body:', error)
-    }
-  }
+  // if (request.headers.get('content-type') === 'application/json') {
+  //   console.warn('Received JSON content-type, but using raw body for webhook')
+  //   try {
+  //     // Attempt to parse and stringify to normalize any potential JSON
+  //     body = JSON.stringify(JSON.parse(body))
+  //   } catch (error) {
+  //     console.error('Error parsing JSON body:', error)
+  //   }
+  // }
 
   // Log the received webhook for debugging
-  console.log('Received Stripe webhook:', {
-    signature,
-    bodyLength: body.length,
-  })
+  // console.log('Received Stripe webhook:', {
+  //   signature,
+  //   bodyLength: body.length,
+  // })
 
-  try {
-    event = stripe.webhooks.constructEvent(
-      jsonBody,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET || ''
-    )
-  } catch (err) {
-    return new Response(
-      `Webhook Error: ${err instanceof Error ? err.message : 'Unknown Error'}`,
-      { status: 400 }
-    )
-  }
+  // // try {
+  // //   event = stripe.webhooks.constructEvent(
+  // //     jsonBody,
+  // //     signature,
+  // //     process.env.STRIPE_WEBHOOK_SECRET || ''
+  // //   )
+  // // } catch (err) {
+  // //   return new Response(
+  // //     `Webhook Error: ${err instanceof Error ? err.message : 'Unknown Error'}`,
+  // //     { status: 400 }
+  // //   )
+  // // }
 
-  // const session = event.data.object as Stripe.Checkout.Session
+  // // // const session = event.data.object as Stripe.Checkout.Session
 
-  if (!session?.metadata?.userId) {
-    return new Response(null, { status: 200 })
-  }
+  // // // if (!session?.metadata?.userId) {
+  // // //   return new Response(null, { status: 200 })
+  // // // }
 
-  switch (event.type) {
-    case 'checkout.session.completed':
-      await handleCheckoutSessionCompleted(session)
-      break
-    case 'invoice.payment_succeeded':
-      await handleInvoicePaymentSucceeded(session)
-      break
-    default:
-      console.log(`Unhandled event type ${event.type}`)
-  }
+  // // // // switch (event.type) {
+  // // // //   case 'checkout.session.completed':
+  // // // //     await handleCheckoutSessionCompleted(session)
+  // // // //     break
+  // // // //   case 'invoice.payment_succeeded':
+  // // // //     await handleInvoicePaymentSucceeded(session)
+  // // // //     break
+  // // // //   default:
+  // // // //     console.log(`Unhandled event type ${event.type}`)
+  // // // // }
 
   return new Response(null, { status: 200 })
 }
