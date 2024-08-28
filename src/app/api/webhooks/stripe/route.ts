@@ -19,6 +19,25 @@ export async function POST(request: Request) {
   console.log('Webhook raw body:', body)
   console.log('Content-Type:', request.headers.get('content-type'))
 
+  // Parse the body as JSON
+  let jsonBody;
+  try {
+    jsonBody = JSON.parse(body);
+    console.log('Parsed JSON body:', jsonBody);
+  } catch (error) {
+    console.error('Error parsing JSON body:', error);
+    return new Response('Invalid JSON', { status: 400 });
+  }
+
+  // Verify the event type
+  if (jsonBody.type !== 'invoice.payment_succeeded') {
+    console.log(`Unhandled event type ${jsonBody.type}`);
+    return new Response(null, { status: 200 });
+  }
+
+  // Extract relevant information from the event
+  const session = jsonBody.data.object;
+
   // Ensure we're using the raw body, not parsed JSON
   if (request.headers.get('content-type') === 'application/json') {
     console.warn('Received JSON content-type, but using raw body for webhook')
@@ -37,8 +56,8 @@ export async function POST(request: Request) {
   })
 
   try {
-    event = await stripe.webhooks.constructEventAsync(
-      body,
+    event = stripe.webhooks.constructEvent(
+      jsonBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET || ''
     )
@@ -49,7 +68,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const session = event.data.object as Stripe.Checkout.Session
+  // const session = event.data.object as Stripe.Checkout.Session
 
   if (!session?.metadata?.userId) {
     return new Response(null, { status: 200 })
