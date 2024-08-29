@@ -409,11 +409,13 @@ export default function Home() {
                       <UpgradeButton />
                     ) : (
                       <Link
-                        href='/sign-in'
+                        href={
+                          user ? '/dashboard' : '/sign-in'
+                        }
                         className={buttonVariants({
                           className: 'w-full',
                         })}>
-                        {user ? 'Atualizar agora' : 'Escolher esse'}
+                        {user ? 'Selecionar' : 'Selecionar'}
                         <ArrowRight className='h-5 w-5 ml-1.5' />
                       </Link>
                     )}
