@@ -54,7 +54,7 @@ export default function Home() {
       quota: PLANS.find((p) => p.slug === 'pro')!.quota,
       features: [
         {
-          text: '50 Páginas por PDF',
+          text: `${PLANS[1].pagesPerPdf} Páginas por PDF`,
           footnote:
             'O máximo de paginas por PDF.',
         },
@@ -82,7 +82,7 @@ export default function Home() {
       quota: PLANS.find((p) => p.slug === 'premium')!.quota,
       features: [
         {
-          text: '300 Páginas por PDF',
+          text: `${PLANS[2].pagesPerPdf} Páginas por PDF`,
           footnote:
             'O máximo de paginas por PDF.',
         },
