@@ -29,7 +29,7 @@ const Page = () => {
       quota: 3,
       features: [
         {
-          text: '5 Páginas por PDF',
+          text: '20 Páginas por PDF',
           footnote:
             'O máximo de paginas por PDF.',
         },
