@@ -19,10 +19,10 @@ export const PLANS = [
     sizePdf: 16,
     pagesPerPdf: 100,
     price: {
-      amount: 25,
+      amount: 10,
       priceIds: {
-        test: 'price_1Ps9Z8BHCJHsCGMUTOKagpNa',
-        production: 'price_1Ps9Z8BHCJHsCGMUTOKagpNa',
+        test: 'price_1PxwkmBHCJHsCGMUcL7h26mP',
+        production: 'price_1PxwkmBHCJHsCGMUcL7h26mP',
       },
     },
   },
@@ -33,10 +33,10 @@ export const PLANS = [
     sizePdf: 80,
     pagesPerPdf: 300,
     price: {
-      amount: 49,
+      amount: 25,
       priceIds: {
-        test: 'price_1PsF0yBHCJHsCGMUPlW781uy',
-        production: 'price_1PsF0yBHCJHsCGMUPlW781uy',
+        test: 'price_1Ps9Z8BHCJHsCGMUTOKagpNa',
+        production: 'price_1Ps9Z8BHCJHsCGMUTOKagpNa',
       },
     },
   },
